@@ -1,6 +1,6 @@
 MW2CC.LoadedFonts = MW2CC.LoadedFonts or false
 
---if !MW2CC.LoadedFonts then
+if !MW2CC.LoadedFonts then
     surface.CreateFont( "mw2callcard_namefont", {
         font = "BankGothic", 
         extended = false,
@@ -55,4 +55,4 @@ MW2CC.LoadedFonts = MW2CC.LoadedFonts or false
         outline = true,
     } )
     MW2CC.LoadedFonts = true
---end
+end

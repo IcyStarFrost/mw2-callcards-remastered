@@ -1,1 +1,1 @@
-if true then end
+util.AddNetworkString( "mw2cc_net_dispatchcard" )

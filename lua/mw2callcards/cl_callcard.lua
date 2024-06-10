@@ -4,11 +4,10 @@ MW2CC.QueuedCards = MW2CC.QueuedCards or {}
 MW2CC.VTFindex = MW2CC.VTFindex or 0
 
 -- Dispatches a call card
-function MW2CC:DispatchCallCard( ent, comment, banner_name )
-    MW2CC.QueuedCards[ #MW2CC.QueuedCards + 1 ] = { 
+function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard )
+    local tbl = { 
         ent = ent, 
         comment = comment, 
-        banner_name = banner_name, 
         killcard = killcard,
 
         comment_x = ScrW() * 2,
@@ -18,7 +17,25 @@ function MW2CC:DispatchCallCard( ent, comment, banner_name )
         bottom_alpha = 255,
         played_snd = false,
     }
+
+    tbl.banner_mat = MW2CC:GetMaterial( banner_path or "mw2cc/titles/DeathFromAbove.png" )
+    tbl.emblem_mat = MW2CC:GetMaterial( emblem_path or "mw2cc/emblems/spray.vtf" )
+
+    MW2CC.QueuedCards[ #MW2CC.QueuedCards + 1 ] = tbl
 end
+
+net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
+    local ent = net.ReadEntity()
+    if !IsValid( ent ) then return end
+    local banner = net.ReadString()
+    local emblem = net.ReadString()
+    local comment = net.ReadString()
+    local killcard = net.ReadBool()
+
+    local banner_path = banner != "nil" and banner or nil
+    local emblem_path = emblem != "nil" and emblem or nil
+    MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard )
+end )
 
 local green = Color( 122, 255, 122)
 local green_glow = Color( 0, 197, 0, 166)
@@ -44,9 +61,6 @@ function MW2CC:GetMaterial( path )
 
     return mat
 end
-
-local mat = MW2CC:GetMaterial( "mw2cc/titles/DeathFromAbove.png" )
-local emblem = MW2CC:GetMaterial( "mw2cc/emblems/spray.vtf" )
 
 -- Retrieves a player's profile picture through the steam API. This will allow higher quality pfps for players if it succeeds
 local function GetPlayerAvatarMaterial(ply, callback)
@@ -77,7 +91,7 @@ end
 
 
 
-function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, bottomalpha )
+function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, banner_mat, emblem_mat, bottomalpha )
     
     ent.mw2cc_lastdraw = CurTime()
     
@@ -141,12 +155,12 @@ function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, bottomalpha )
 
     -- Emblem
     surface.SetDrawColor( 255, 255, 255, 255 * ( bottomalpha / 255 ))
-    surface.SetMaterial( emblem )
+    surface.SetMaterial( emblem_mat )
     surface.DrawTexturedRect( x + w - 30, y + h + 3, 25, 25 )
 
     -- Banner
     surface.SetDrawColor( 255, 255, 255)
-    surface.SetMaterial( mat )
+    surface.SetMaterial( banner_mat )
     surface.DrawTexturedRect( x + 15, y + 10, 250, 45 )
 
     -- Comment
@@ -157,6 +171,7 @@ function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, bottomalpha )
     -- Main name
     if !IsValid( ent.mw2cc_name ) then
         ent.mw2cc_name = vgui.Create( "DLabel", GetHUDPanel() )
+        if !IsValid( ent.mw2cc_name ) then return end
         ent.mw2cc_name:SetPos( x + 10, y + h - 40  )
         ent.mw2cc_name:SetSize( 265, 30 )
         ent.mw2cc_name:SetText( ent:Name():upper() )
@@ -174,14 +189,6 @@ function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, bottomalpha )
     end
 end
 
-
-if IsValid( Entity(1).mw2cc_name ) then
-    Entity(1).mw2cc_name:Remove()
-end
-
-if IsValid( Entity(1).mw2cc_pfp ) then
-    Entity(1).mw2cc_pfp:Remove()
-end
 
 --[[ ent = ent, 
 comment = comment, 
@@ -223,7 +230,7 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
             card.bottom_alpha = ( card.comment_x / ( ScrW() * 2 ) ) * 255
         end
 
-        MW2CC:DrawCallCard( card.cur_pos, 70, card.ent, card.comment, card.comment_x, card.bottom_alpha )
+        MW2CC:DrawCallCard( card.cur_pos, 70, card.ent, card.comment, card.comment_x, card.banner_mat, card.emblem_mat, card.bottom_alpha )
 
         break
     end
