@@ -16,6 +16,14 @@ function MW2CC:EntKilled( victim, attacker, dmginfo )
     victim.mw2cc_killstreak = 0
     attacker.mw2cc_killstreak = attacker.mw2cc_killstreak and attacker.mw2cc_killstreak + 1 or 1
 
+    if attacker:IsPlayer() then
+        MW2CC:DispatchCallCard( victim, "Killed", true, attacker )
+    end
+
+    if victim:IsPlayer() then
+        MW2CC:DispatchCallCard( attacker, "Killed By", true, victim )
+    end
+
     attacker.mw2cc_rapidkills = attacker.mw2cc_rapidkills and 
     CurTime() < attacker.mw2cc_rapidkills.timeout and 
     attacker.mw2cc_rapidkills or { timeout = CurTime() + 0.5, kills = 0, ignoreents = {} }
@@ -28,7 +36,7 @@ function MW2CC:EntKilled( victim, attacker, dmginfo )
 
     timer.Create( "mw2cc_rapidkills_" .. attacker:GetCreationID(), 0.5, 1, function()
         if !IsValid( attacker ) then return end 
-        
+
         if attacker.mw2cc_rapidkills.kills == 2 then
             MW2CC:DispatchCallCard( attacker, "Double Kill!" )
         elseif attacker.mw2cc_rapidkills.kills == 3 then

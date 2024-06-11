@@ -1,6 +1,7 @@
 file.CreateDir( "mw2cc_data" )
 
 MW2CC.QueuedCards = MW2CC.QueuedCards or {}
+MW2CC.QueuedKillCards = MW2CC.QueuedKillCards or {}
 MW2CC.VTFindex = MW2CC.VTFindex or 0
 
 -- Dispatches a call card
@@ -9,15 +10,27 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         ent = ent, 
         comment = comment, 
         killcard = killcard,
-
-        comment_x = ScrW() * 2,
-        x = ScrW() * 2,
-        y = 70,
-        end_time = 5,
         target_x = ScrW() - 450,
+        target_y = ScrH() - 150,
         bottom_alpha = 255,
+        
         played_snd = false,
+        invert = false,
     }
+
+    if killcard then
+        tbl.x = ScrW() / 2 - 370 / 2
+        tbl.y = ScrH() * 2
+        tbl.comment_x = 170
+        tbl.comment_y = - 150
+        tbl.end_time = 2
+    else
+        tbl.x = ScrW() * 2
+        tbl.y = 70
+        tbl.comment_x = ScrW() * 2
+        tbl.comment_y = 0
+        tbl.end_time = 5
+    end
 
     tbl.banner_mat = MW2CC:GetMaterial( banner_path or "mw2cc/titles/DeathFromAbove.png" )
     tbl.emblem_mat = MW2CC:GetMaterial( emblem_path or "mw2cc/emblems/spray.vtf" )
@@ -35,7 +48,11 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         tbl.pfp = Material( "spawnicons/" .. string.sub( mdl, 1, #mdl - 4 ) .. ".png" )
     end
 
-    MW2CC.QueuedCards[ #MW2CC.QueuedCards + 1 ] = tbl
+    if killcard then
+        MW2CC.QueuedKillCards[ #MW2CC.QueuedKillCards + 1 ] = tbl
+    else
+        MW2CC.QueuedCards[ #MW2CC.QueuedCards + 1 ] = tbl
+    end
 end
 
 net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
@@ -83,7 +100,7 @@ local function GetPlayerAvatarMaterial(ply, callback)
 
     http.Fetch( "https://steamcommunity.com/profiles/" .. steamID64 .. "?xml=1", function( body, len, headers, code )
         -- Shame.
-        if code ~= 200 then
+        if code != 200 then
             return
         end
 
@@ -122,6 +139,7 @@ function MW2CC:DrawCallCard( card )
     local x = card.x
     local y = card.y
 
+    
     -- Main body
     surface.SetDrawColor( 129, 129, 129, 70 )
     --surface.SetMaterial( scanlines )
@@ -195,13 +213,12 @@ function MW2CC:DrawCallCard( card )
 
     -- Comment
     
-    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( x + 10 ) + card.comment_x, y + h, green_glow, TEXT_ALIGN_LEFT )
-    draw.DrawText( card.comment, "mw2callcard_commentfont", ( x + 10 ) + card.comment_x, y + h, color_white, TEXT_ALIGN_LEFT )
+    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( !card.invert and ( x + 10 ) or ( x + w - 100 ) ) + card.comment_x, ( y + h ) + card.comment_y, green_glow, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
+    draw.DrawText( card.comment, "mw2callcard_commentfont", ( !card.invert and ( x + 10 ) or ( x + w - 100 ) ) + card.comment_x, ( y + h ) + card.comment_y, color_white, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
 
     -- Main name
     if !IsValid( card.mw2cc_name ) then
         card.mw2cc_name = vgui.Create( "DLabel", GetHUDPanel() )
-        if !IsValid( card.mw2cc_name ) then return end
         card.mw2cc_name:SetPos( x + 10, y + h - 40  )
         card.mw2cc_name:SetSize( 265, 30 )
         card.mw2cc_name:SetText( card.name )
@@ -251,15 +268,36 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
             return
         end
 
-        if timeleft > 5 * 0.5 then
+        if timeleft > card.end_time * 0.5 then
             card.x = Lerp( FrameTime() * 30, card.x, card.target_x )
-        elseif timeleft < 5 * 0.2 then
+        elseif timeleft < card.end_time * 0.2 then
             card.x = Lerp( FrameTime() * 5, card.x, ScrW() * 2 )
         end
 
-        if timeleft < 5 * 0.70 then
+        if timeleft < card.end_time * 0.70 then
             card.comment_x = Lerp( FrameTime() * 30, card.comment_x, 0 )
             card.bottom_alpha = ( card.comment_x / ( ScrW() * 2 ) ) * 255
+        end
+
+        MW2CC:DrawCallCard( card )
+
+        break
+    end
+
+    for k, card in ipairs( MW2CC.QueuedKillCards ) do
+        card.end_time_sys = card.end_time_sys or SysTime() + card.end_time
+
+        local timeleft = card.end_time_sys - SysTime()
+
+        if timeleft <= 0 then
+            table.remove( MW2CC.QueuedKillCards, k )
+            return
+        end
+
+        if timeleft > card.end_time * 0.5 then
+            card.y = Lerp( FrameTime() * 30, card.y, card.target_y )
+        elseif timeleft < card.end_time * 0.2 then
+            card.y = Lerp( FrameTime() * 5, card.y, ScrH() * 2 )
         end
 
         MW2CC:DrawCallCard( card )
