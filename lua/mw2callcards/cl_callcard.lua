@@ -24,7 +24,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         tbl.y = ScrH() * 2
         tbl.comment_x = 170
         tbl.comment_y = - 150
-        tbl.end_time = 2
+        tbl.end_time = 3
     else
         tbl.x = ScrW() * 2
         tbl.y = 70
