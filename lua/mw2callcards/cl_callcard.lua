@@ -18,6 +18,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         invert = false,
     }
 
+    -- Set up the card positions based on if its a kill card or a call card
     if killcard then
         tbl.x = ScrW() / 2 - 370 / 2
         tbl.y = ScrH() * 2
@@ -32,15 +33,18 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         tbl.end_time = 5
     end
 
+    -- Prepare materials
     tbl.banner_mat = MW2CC:GetMaterial( banner_path or "mw2cc/titles/DeathFromAbove.png" )
     tbl.emblem_mat = MW2CC:GetMaterial( emblem_path or "mw2cc/emblems/spray.vtf" )
 
+    -- Prepare name
     if tbl.ent.IsLambdaPlayer or tbl.ent:IsPlayer() then
         tbl.name = tbl.ent:Name():upper()
     else
         tbl.name = language.GetPhrase( "#" .. tbl.ent:GetClass() )
     end
 
+    -- Prepare pictures
     if ent.IsLambdaPlayer then
         tbl.pfp = ent:GetPFPMat()
     else
@@ -48,6 +52,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         tbl.pfp = Material( "spawnicons/" .. string.sub( mdl, 1, #mdl - 4 ) .. ".png" )
     end
 
+    -- Assign the card to the correct queue
     if killcard then
         MW2CC.QueuedKillCards[ #MW2CC.QueuedKillCards + 1 ] = tbl
     else
@@ -71,6 +76,7 @@ end )
 local green = Color( 122, 255, 122)
 local green_glow = Color( 0, 197, 0, 166)
 
+-- Returns a Material from the given path. Supports .VTF files that are animated
 function MW2CC:GetMaterial( path )
     local mat 
     if string.EndsWith( path, ".vtf" ) then
@@ -120,15 +126,6 @@ local function GetPlayerAvatarMaterial(ply, callback)
     end )
 end
 
-local pnls = {}
-function MW2CC:RemovePanels()
-    for k, v in ipairs( pnls ) do
-        if IsValid( v ) then
-            v:Remove()
-        end
-    end
-end
-
 
 function MW2CC:DrawCallCard( card )
     
@@ -142,7 +139,6 @@ function MW2CC:DrawCallCard( card )
     
     -- Main body
     surface.SetDrawColor( 129, 129, 129, 70 )
-    --surface.SetMaterial( scanlines )
     surface.DrawRect( x, y, w, h )
     surface.SetDrawColor( 0, 0, 0)
     surface.DrawOutlinedRect( x, y, w, h, 2 )
@@ -200,6 +196,7 @@ function MW2CC:DrawCallCard( card )
     if IsValid( card.mw2cc_pfp ) then
         card.mw2cc_pfp:SetPos( x + w - 90, y + h - 90 )
     end
+    ----------
 
     -- Emblem
     surface.SetDrawColor( 255, 255, 255, 255 * ( card.bottom_alpha / 255 ))
@@ -239,21 +236,12 @@ function MW2CC:DrawCallCard( card )
 end
 
 
---[[ ent = ent, 
-comment = comment, 
-banner_name = banner_name, 
-killcard = killcard,
-
-comment_x = ScrW() * 2,
-cur_pos = ScrW() * 2,
-end_time = 5,
-target_pos = 1600,
-bottom_alpha = 255,
-played_snd = false,
-]]
-
 hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
+
+    -- Call card queue --
+    -- The announcement cards
     for k, card in ipairs( MW2CC.QueuedCards ) do
+        -- Classic sound
         if !card.played_snd then
             surface.PlaySound( "mw2cc/mp_cardslide_v6.wav" )
             card.played_snd = true
@@ -268,12 +256,13 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
             return
         end
 
-        if timeleft > card.end_time * 0.5 then
+        if timeleft > card.end_time * 0.5 then -- Animate in
             card.x = Lerp( FrameTime() * 30, card.x, card.target_x )
-        elseif timeleft < card.end_time * 0.2 then
+        elseif timeleft < card.end_time * 0.2 then -- Animate out
             card.x = Lerp( FrameTime() * 5, card.x, ScrW() * 2 )
         end
 
+        -- Animate the comment in after a delay
         if timeleft < card.end_time * 0.70 then
             card.comment_x = Lerp( FrameTime() * 30, card.comment_x, 0 )
             card.bottom_alpha = ( card.comment_x / ( ScrW() * 2 ) ) * 255
@@ -284,6 +273,7 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
         break
     end
 
+    -- Kill card queue --
     for k, card in ipairs( MW2CC.QueuedKillCards ) do
         card.end_time_sys = card.end_time_sys or SysTime() + card.end_time
 
@@ -294,9 +284,9 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
             return
         end
 
-        if timeleft > card.end_time * 0.5 then
+        if timeleft > card.end_time * 0.5 then -- Animate in
             card.y = Lerp( FrameTime() * 30, card.y, card.target_y )
-        elseif timeleft < card.end_time * 0.2 then
+        elseif timeleft < card.end_time * 0.2 then -- Animate out
             card.y = Lerp( FrameTime() * 5, card.y, ScrH() * 2 )
         end
 
