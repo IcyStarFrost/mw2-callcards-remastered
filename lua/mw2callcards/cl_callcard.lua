@@ -5,7 +5,7 @@ MW2CC.QueuedKillCards = MW2CC.QueuedKillCards or {}
 MW2CC.VTFindex = MW2CC.VTFindex or 0
 
 -- Dispatches a call card
-function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard )
+function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard, snd )
     local tbl = { 
         ent = ent, 
         comment = comment, 
@@ -13,6 +13,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         target_x = ScrW() * GetConVar( "mw2cc_announcex" ):GetFloat(),
         target_y = ScrH() * GetConVar( "mw2cc_killy" ):GetFloat(),
         bottom_alpha = 255,
+        snd = snd,
         
         played_snd = false,
     }
@@ -71,14 +72,17 @@ net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
     local banner = net.ReadString()
     local emblem = net.ReadString()
     local comment = net.ReadString()
+    local snd = net.ReadString()
     local killcard = net.ReadBool()
 
     if !killcard and !GetConVar( "mw2cc_allowannouncecards" ):GetBool() then return end
     if killcard and !GetConVar( "mw2cc_allowkillcards" ):GetBool() then return end
 
+    local path = snd == "" and "mw2cc/mp_cardslide_v6.wav" or snd == "none" and "" or snd
+
     local banner_path = banner != "nil" and banner or nil
     local emblem_path = emblem != "nil" and emblem or nil
-    MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard )
+    MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard, path )
 end )
 
 local green = Color( 122, 255, 122)
@@ -246,8 +250,8 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
     -- The announcement cards
     for k, card in ipairs( MW2CC.QueuedCards ) do
         -- Classic sound
-        if !card.played_snd then
-            surface.PlaySound( "mw2cc/mp_cardslide_v6.wav" )
+        if !card.played_snd and card.snd != "" then
+            surface.PlaySound( card.snd )
             card.played_snd = true
         end
 
