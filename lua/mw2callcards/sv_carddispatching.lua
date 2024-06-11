@@ -12,6 +12,7 @@ end
 
 
 function MW2CC:EntKilled( victim, attacker, dmginfo )
+    if victim == attacker then return end
 
     victim.mw2cc_killstreak = 0
     attacker.mw2cc_killstreak = attacker.mw2cc_killstreak and attacker.mw2cc_killstreak + 1 or 1
@@ -50,7 +51,7 @@ function MW2CC:EntKilled( victim, attacker, dmginfo )
         MW2CC:DispatchCallCard( attacker, "DESTROYED STRIDER!" )
     end
 
-    if attacker.mw2cc_killstreak % 5 == 0 then
+    if attacker.mw2cc_killstreak % GetConVar( "mw2cc_killstreakthreshold" ):GetInt() == 0 then
         self:DispatchCallCard( attacker, string.CardinalToOrdinal( attacker.mw2cc_killstreak ):upper() .. " KILLSTREAK!" )
         hook.Run( "MW2CC_OnKillstreak", attacker, attacker.mw2cc_killstreak )
     end
@@ -58,19 +59,12 @@ end
 
 
 hook.Add( "PostEntityTakeDamage", "mw2cc_postentitytakedamage", function( ent, dmg )
-    if !ent:IsNPC() and !ent:IsNextBot() and !ent:IsPlayer() or ent:Health() > 0 then return end
+    if !ent:IsNPC() and !ent:IsNextBot() and !ent:IsPlayer() or ent:Health() > 0 or ent.mw2cc_ignore then return end
 
+    ent.mw2cc_ignore = true
     MW2CC:EntKilled( ent, dmg:GetAttacker(), dmg )
 end )
 
 hook.Add( "LambdaOnKilled", "mw2cc_lambdaonkilled", function( lambda, dmg )
     MW2CC:EntKilled( lambda, dmg:GetAttacker(), dmg )
-end )
-
-hook.Add( "OnEntityCreated", "mw2cc_cosmeticassignment", function( ent )
-    timer.Simple( 0, function()
-        if !IsValid( ent ) then return end
-        ent.mw2cc_banner = "mw2cc/titles/DeathFromAbove.png"
-        ent.mw2cc_emblem = "mw2cc/emblems/spray.vtf"
-    end )
 end )

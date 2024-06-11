@@ -68,6 +68,9 @@ net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
     local comment = net.ReadString()
     local killcard = net.ReadBool()
 
+    if !killcard and !GetConVar( "mw2cc_allowannouncecards" ):GetBool() then return end
+    if killcard and !GetConVar( "mw2cc_allowkillcards" ):GetBool() then return end
+
     local banner_path = banner != "nil" and banner or nil
     local emblem_path = emblem != "nil" and emblem or nil
     MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard )
@@ -166,8 +169,6 @@ function MW2CC:DrawCallCard( card )
         card.mw2cc_pfp:SetPos( x + w - 90, y + h - 90  )
         card.mw2cc_pfp:SetSize( 80, 80 )
         card.mw2cc_pfp:SetPlayer( card.ent )
-
-        pnls[ #pnls + 1 ] = card.mw2cc_pfp
         
         function card.mw2cc_pfp:Think()
             if card.lastdraw + 0.1 < CurTime() then  
@@ -221,8 +222,6 @@ function MW2CC:DrawCallCard( card )
         card.mw2cc_name:SetText( card.name )
         card.mw2cc_name:SetFont( "mw2callcard_namefont" )
         card.mw2cc_name:SetColor( green )
-
-        pnls[ #pnls + 1 ] = card.mw2cc_name
 
         function card.mw2cc_name:Think()
             if card.lastdraw + 0.1 < CurTime() then  
