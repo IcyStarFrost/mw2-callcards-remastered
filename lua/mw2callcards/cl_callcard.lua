@@ -10,25 +10,30 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         ent = ent, 
         comment = comment, 
         killcard = killcard,
-        target_x = ScrW() - 450,
-        target_y = ScrH() - 150,
+        target_x = ScrW() * GetConVar( "mw2cc_announcex" ):GetFloat(),
+        target_y = ScrH() * GetConVar( "mw2cc_killy" ):GetFloat(),
         bottom_alpha = 255,
         
         played_snd = false,
-        invert = false,
     }
-
+    
     -- Set up the card positions based on if its a kill card or a call card
     if killcard then
-        tbl.x = ScrW() / 2 - 370 / 2
-        tbl.y = ScrH() * 2
+        local invert = GetConVar( "mw2cc_killy" ):GetFloat() < 0.5
+        tbl.x = ScrW() * GetConVar( "mw2cc_killx" ):GetFloat()
+        tbl.y = !invert and ScrH() * 2 or ScrH() * -2
+
+        tbl.invert = invert
         tbl.comment_x = 170
-        tbl.comment_y = - 150
+        tbl.comment_y = !invert and -150 or 50
         tbl.end_time = 3
     else
-        tbl.x = ScrW() * 2
-        tbl.y = 70
-        tbl.comment_x = ScrW() * 2
+        local invert = GetConVar( "mw2cc_announcex" ):GetFloat() < 0.5
+
+        tbl.invert = invert
+        tbl.x = !invert and ScrW() * 2 or ScrW() * -2
+        tbl.y = ScrH() * GetConVar( "mw2cc_announcey" ):GetFloat()
+        tbl.comment_x = !invert and ScrW() * 2 or ScrW() * -2
         tbl.comment_y = 0
         tbl.end_time = 5
     end
@@ -211,8 +216,8 @@ function MW2CC:DrawCallCard( card )
 
     -- Comment
     
-    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( !card.invert and ( x + 10 ) or ( x + w - 100 ) ) + card.comment_x, ( y + h ) + card.comment_y, green_glow, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
-    draw.DrawText( card.comment, "mw2callcard_commentfont", ( !card.invert and ( x + 10 ) or ( x + w - 100 ) ) + card.comment_x, ( y + h ) + card.comment_y, color_white, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
+    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( x + 10 ) + card.comment_x, ( y + h ) + card.comment_y, green_glow, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
+    draw.DrawText( card.comment, "mw2callcard_commentfont", ( x + 10 ) + card.comment_x, ( y + h ) + card.comment_y, color_white, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
 
     -- Main name
     if !IsValid( card.mw2cc_name ) then
@@ -258,7 +263,7 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
         if timeleft > card.end_time * 0.5 then -- Animate in
             card.x = Lerp( FrameTime() * 30, card.x, card.target_x )
         elseif timeleft < card.end_time * 0.2 then -- Animate out
-            card.x = Lerp( FrameTime() * 5, card.x, ScrW() * 2 )
+            card.x = Lerp( FrameTime() * 5, card.x, !card.invert and ScrW() * 2 or ScrW() * -2 )
         end
 
         -- Animate the comment in after a delay
@@ -286,7 +291,7 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
         if timeleft > card.end_time * 0.5 then -- Animate in
             card.y = Lerp( FrameTime() * 30, card.y, card.target_y )
         elseif timeleft < card.end_time * 0.2 then -- Animate out
-            card.y = Lerp( FrameTime() * 5, card.y, ScrH() * 2 )
+            card.y = Lerp( FrameTime() * 5, card.y, !card.invert and ScrH() * 2 or ScrH() * -2 )
         end
 
         MW2CC:DrawCallCard( card )

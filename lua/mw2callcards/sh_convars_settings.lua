@@ -1,6 +1,6 @@
 MW2CC.ConVars = {}
 
-function MW2CC:ConVar( optionname, name, value, clientside, type, helptext, min, max )
+function MW2CC:ConVar( optionname, name, value, clientside, type, helptext, min, max, decimals )
     local cvar
     if clientside and CLIENT then
         cvar = CreateConVar( name, value, FCVAR_ARCHIVE, helptext, min, max )
@@ -8,14 +8,19 @@ function MW2CC:ConVar( optionname, name, value, clientside, type, helptext, min,
         cvar = CreateConVar( name, value, FCVAR_ARCHIVE, helptext, min, max )
     end
 
-    MW2CC.ConVars[ #MW2CC.ConVars + 1 ] = { optionname = optionname, type = type, name = name, value = value, desc = helptext, cvar = cvar, clientside = clientside, min = min, max = max }
+    MW2CC.ConVars[ #MW2CC.ConVars + 1 ] = { optionname = optionname, decimals = decimals, type = type, name = name, value = value, desc = helptext, cvar = cvar, clientside = clientside, min = min, max = max }
 end
 
 
 MW2CC:ConVar( "Allow Announcement Cards", "mw2cc_allowannouncecards", 1, true, "bool", "If announcement cards are allowed to be displayed. I.e killstreak announcements, ect", 0, 1 )
 MW2CC:ConVar( "Allow Kill Cards", "mw2cc_allowkillcards", 1, true, "bool", "If kill cards are allowed to be displayed", 0, 1 )
-MW2CC:ConVar( "Killstreak Threshold", "mw2cc_killstreakthreshold", 5, false, "slider", "The amount of kills needed without dying before a killstreak announcement is made", 1, 50 )
-    
+MW2CC:ConVar( "Killstreak Threshold", "mw2cc_killstreakthreshold", 5, false, "slider", "The amount of kills needed without dying before a killstreak announcement is made", 1, 50, 0 )
+
+MW2CC:ConVar( "Announce Card Y", "mw2cc_announcey", 0.036, true, "slider", "The verticle position of the announce cards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Announce Card X", "mw2cc_announcex", 0.765, true, "slider", "The horizontal position of the announce cards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Kill Card Y", "mw2cc_killy", 0.86, true, "slider", "The verticle position of the killcards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Kill Card X", "mw2cc_killx", 0.403, true, "slider", "The horizontal position of the killcards as a percentage of your screen size", 0, 1, 3 )
+
 concommand.Add( "mw2cc_previewannouncement", function( ply )
     MW2CC:DispatchCallCard( ply, "PREVIEW TEST", false, ply )
 end )
@@ -43,12 +48,11 @@ if CLIENT then
                 local prefix = v.clientside and "Client-Side | " or "Server-Side | "
                 if v.type == "bool" then
                     pnl:CheckBox( v.optionname, v.name )
-                    local lbl = pnl:ControlHelp( prefix .. v.desc )
+                    local lbl = pnl:ControlHelp( prefix .. v.desc .. "\n\nDefault: " .. v.cvar:GetDefault() )
                     lbl:SetColor( clr )
                 elseif v.type == "slider" then
-                    print(v.optionname, v.name, v.min, v.max)
-                    pnl:NumSlider( v.optionname, v.name, v.min, v.max, 0 )
-                    local lbl = pnl:ControlHelp( prefix .. v.desc )
+                    pnl:NumSlider( v.optionname, v.name, v.min, v.max, v.decimals )
+                    local lbl = pnl:ControlHelp( prefix .. v.desc .. "\n\nDefault: " .. v.cvar:GetDefault() )
                     lbl:SetColor( clr )
                 end
             end
