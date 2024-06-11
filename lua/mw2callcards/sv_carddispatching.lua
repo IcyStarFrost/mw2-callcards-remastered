@@ -18,17 +18,28 @@ function MW2CC:EntKilled( victim, attacker, dmginfo )
 
     attacker.mw2cc_rapidkills = attacker.mw2cc_rapidkills and 
     CurTime() < attacker.mw2cc_rapidkills.timeout and 
-    attacker.mw2cc_rapidkills or { timeout = CurTime() + 0.5, kills = 0 }
+    attacker.mw2cc_rapidkills or { timeout = CurTime() + 0.5, kills = 0, ignoreents = {} }
 
-    attacker.mw2cc_rapidkills.timeout = CurTime() + 0.5
-    attacker.mw2cc_rapidkills.kills = attacker.mw2cc_rapidkills.kills + 1
+    if !attacker.mw2cc_rapidkills.ignoreents[ victim ] then
+        attacker.mw2cc_rapidkills.timeout = CurTime() + 0.5
+        attacker.mw2cc_rapidkills.kills = attacker.mw2cc_rapidkills.kills + 1
+        attacker.mw2cc_rapidkills.ignoreents[ victim ] = true
+    end
 
-    if attacker.mw2cc_rapidkills.kills == 2 then
-        MW2CC:DispatchCallCard( attacker, "Double Kill!" )
-    elseif attacker.mw2cc_rapidkills.kills == 3 then
-        MW2CC:DispatchCallCard( attacker, "Triple Kill!" )
-    elseif attacker.mw2cc_rapidkills.kills > 3 then
-        MW2CC:DispatchCallCard( attacker, "Multi Kill!" )
+    timer.Create( "mw2cc_rapidkills_" .. attacker:GetCreationID(), 0.5, 1, function()
+        if !IsValid( attacker ) then return end 
+        
+        if attacker.mw2cc_rapidkills.kills == 2 then
+            MW2CC:DispatchCallCard( attacker, "Double Kill!" )
+        elseif attacker.mw2cc_rapidkills.kills == 3 then
+            MW2CC:DispatchCallCard( attacker, "Triple Kill!" )
+        elseif attacker.mw2cc_rapidkills.kills > 3 then
+            MW2CC:DispatchCallCard( attacker, "Multi Kill!" )
+        end
+    end )
+
+    if victim:GetClass() == "npc_strider" then
+        MW2CC:DispatchCallCard( attacker, "DESTROYED STRIDER!" )
     end
 
     if attacker.mw2cc_killstreak % 5 == 0 then

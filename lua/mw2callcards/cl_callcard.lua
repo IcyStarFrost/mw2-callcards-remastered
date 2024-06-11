@@ -11,15 +11,29 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         killcard = killcard,
 
         comment_x = ScrW() * 2,
-        cur_pos = ScrW() * 2,
+        x = ScrW() * 2,
+        y = 70,
         end_time = 5,
-        target_pos = ScrW() - 450,
+        target_x = ScrW() - 450,
         bottom_alpha = 255,
         played_snd = false,
     }
 
     tbl.banner_mat = MW2CC:GetMaterial( banner_path or "mw2cc/titles/DeathFromAbove.png" )
     tbl.emblem_mat = MW2CC:GetMaterial( emblem_path or "mw2cc/emblems/spray.vtf" )
+
+    if tbl.ent.IsLambdaPlayer or tbl.ent:IsPlayer() then
+        tbl.name = tbl.ent:Name():upper()
+    else
+        tbl.name = language.GetPhrase( "#" .. tbl.ent:GetClass() )
+    end
+
+    if ent.IsLambdaPlayer then
+        tbl.pfp = ent:GetPFPMat()
+    else
+        local mdl = ent:GetModel()
+        tbl.pfp = Material( "spawnicons/" .. string.sub( mdl, 1, #mdl - 4 ) .. ".png" )
+    end
 
     MW2CC.QueuedCards[ #MW2CC.QueuedCards + 1 ] = tbl
 end
@@ -89,14 +103,24 @@ local function GetPlayerAvatarMaterial(ply, callback)
     end )
 end
 
+local pnls = {}
+function MW2CC:RemovePanels()
+    for k, v in ipairs( pnls ) do
+        if IsValid( v ) then
+            v:Remove()
+        end
+    end
+end
 
 
-function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, banner_mat, emblem_mat, bottomalpha )
+function MW2CC:DrawCallCard( card )
     
-    ent.mw2cc_lastdraw = CurTime()
+    card.lastdraw = CurTime()
     
     local w = 370
     local h = 100
+    local x = card.x
+    local y = card.y
 
     -- Main body
     surface.SetDrawColor( 129, 129, 129, 70 )
@@ -112,80 +136,88 @@ function MW2CC:DrawCallCard( x, y, ent, comment, comment_rela_x, banner_mat, emb
     end
 
     -- Lower body
-    surface.SetDrawColor( 139, 139, 139, 40 * ( bottomalpha / 255 ) )
+    surface.SetDrawColor( 139, 139, 139, 40 * ( card.bottom_alpha / 255 ) )
     surface.DrawRect( x, y + h, w, 30 )
-    surface.SetDrawColor( 0, 0, 0, 255* ( bottomalpha / 255 ))
+    surface.SetDrawColor( 0, 0, 0, 255* ( card.bottom_alpha / 255 ))
     surface.DrawOutlinedRect( x, y + h, w, 30, 1 )
 
     for i = 1, scanlines do 
-        surface.SetDrawColor( 0, 0, 0, 150 * ( bottomalpha / 255 ) )
+        surface.SetDrawColor( 0, 0, 0, 150 * ( card.bottom_alpha / 255 ) )
         surface.DrawRect( x, ( y + h ) + ( 30 * ( i / scanlines ) ), w, 1 )
     end
 
     -- Picture
-    if ent:IsPlayer() and !IsValid( ent.mw2cc_pfp ) and !ent.mw2cc_hashdpfp then
-        ent.mw2cc_pfp = vgui.Create( "AvatarImage", GetHUDPanel() )
-        ent.mw2cc_pfp:SetPos( x + w - 90, y + h - 90  )
-        ent.mw2cc_pfp:SetSize( 80, 80 )
-        ent.mw2cc_pfp:SetPlayer( ent )
+    if card.ent:IsPlayer() and !IsValid( card.mw2cc_pfp ) and !card.hashdpfp then
+        card.mw2cc_pfp = vgui.Create( "AvatarImage", GetHUDPanel() )
+        card.mw2cc_pfp:SetPos( x + w - 90, y + h - 90  )
+        card.mw2cc_pfp:SetSize( 80, 80 )
+        card.mw2cc_pfp:SetPlayer( card.ent )
+
+        pnls[ #pnls + 1 ] = card.mw2cc_pfp
         
-        function ent.mw2cc_pfp:Think()
-            if ent.mw2cc_lastdraw + 0.1 < CurTime() then  
+        function card.mw2cc_pfp:Think()
+            if card.lastdraw + 0.1 < CurTime() then  
                 self:Remove()
                 return
             end
         end
 
         -- If this succeeds, congrats! higher quality PFP
-        GetPlayerAvatarMaterial( ent, function( mat )
+        GetPlayerAvatarMaterial( card.ent, function( mat )
             if !mat then return end
-            ent.mw2cc_hdpfp = mat
-            ent.mw2cc_hashdpfp = true
-            ent.mw2cc_pfp:Remove()
+            card.hdpfp = mat
+            card.hashdpfp = true
+            card.mw2cc_pfp:Remove()
         end )
-    elseif ent:IsPlayer() and ent.mw2cc_hashdpfp then -- Use the higher quality profile picture
+    elseif card.ent:IsPlayer() and card.hashdpfp then -- Use the higher quality profile picture
         surface.SetDrawColor( 255, 255, 255 )
-        surface.SetMaterial( ent.mw2cc_hdpfp )
+        surface.SetMaterial( card.hdpfp )
+        surface.DrawTexturedRect( x + w - 90, y + h - 90, 80, 80 )
+    else
+        surface.SetDrawColor( 255, 255, 255 )
+        surface.SetMaterial( card.pfp )
         surface.DrawTexturedRect( x + w - 90, y + h - 90, 80, 80 )
     end
 
-    if IsValid( ent.mw2cc_pfp ) then
-        ent.mw2cc_pfp:SetPos( x + w - 90, y + h - 90 )
+    if IsValid( card.mw2cc_pfp ) then
+        card.mw2cc_pfp:SetPos( x + w - 90, y + h - 90 )
     end
 
     -- Emblem
-    surface.SetDrawColor( 255, 255, 255, 255 * ( bottomalpha / 255 ))
-    surface.SetMaterial( emblem_mat )
+    surface.SetDrawColor( 255, 255, 255, 255 * ( card.bottom_alpha / 255 ))
+    surface.SetMaterial( card.emblem_mat )
     surface.DrawTexturedRect( x + w - 30, y + h + 3, 25, 25 )
 
     -- Banner
     surface.SetDrawColor( 255, 255, 255)
-    surface.SetMaterial( banner_mat )
+    surface.SetMaterial( card.banner_mat )
     surface.DrawTexturedRect( x + 15, y + 10, 250, 45 )
 
     -- Comment
     
-    draw.DrawText( comment, "mw2callcard_commentblurfont", ( x + 10 ) + comment_rela_x, y + h, green_glow, TEXT_ALIGN_LEFT )
-    draw.DrawText( comment, "mw2callcard_commentfont", ( x + 10 ) + comment_rela_x, y + h, color_white, TEXT_ALIGN_LEFT )
+    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( x + 10 ) + card.comment_x, y + h, green_glow, TEXT_ALIGN_LEFT )
+    draw.DrawText( card.comment, "mw2callcard_commentfont", ( x + 10 ) + card.comment_x, y + h, color_white, TEXT_ALIGN_LEFT )
 
     -- Main name
-    if !IsValid( ent.mw2cc_name ) then
-        ent.mw2cc_name = vgui.Create( "DLabel", GetHUDPanel() )
-        if !IsValid( ent.mw2cc_name ) then return end
-        ent.mw2cc_name:SetPos( x + 10, y + h - 40  )
-        ent.mw2cc_name:SetSize( 265, 30 )
-        ent.mw2cc_name:SetText( ent:Name():upper() )
-        ent.mw2cc_name:SetFont( "mw2callcard_namefont" )
-        ent.mw2cc_name:SetColor( green )
+    if !IsValid( card.mw2cc_name ) then
+        card.mw2cc_name = vgui.Create( "DLabel", GetHUDPanel() )
+        if !IsValid( card.mw2cc_name ) then return end
+        card.mw2cc_name:SetPos( x + 10, y + h - 40  )
+        card.mw2cc_name:SetSize( 265, 30 )
+        card.mw2cc_name:SetText( card.name )
+        card.mw2cc_name:SetFont( "mw2callcard_namefont" )
+        card.mw2cc_name:SetColor( green )
 
-        function ent.mw2cc_name:Think()
-            if ent.mw2cc_lastdraw + 0.1 < CurTime() then  
+        pnls[ #pnls + 1 ] = card.mw2cc_name
+
+        function card.mw2cc_name:Think()
+            if card.lastdraw + 0.1 < CurTime() then  
                 self:Remove()
                 return
             end
         end
     else
-        ent.mw2cc_name:SetPos( x + 10, y + h - 40 )
+        card.mw2cc_name:SetPos( x + 10, y + h - 40 )
     end
 end
 
@@ -220,9 +252,9 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
         end
 
         if timeleft > 5 * 0.5 then
-            card.cur_pos = Lerp( FrameTime() * 30, card.cur_pos, card.target_pos )
+            card.x = Lerp( FrameTime() * 30, card.x, card.target_x )
         elseif timeleft < 5 * 0.2 then
-            card.cur_pos = Lerp( FrameTime() * 5, card.cur_pos, ScrW() * 2 )
+            card.x = Lerp( FrameTime() * 5, card.x, ScrW() * 2 )
         end
 
         if timeleft < 5 * 0.70 then
@@ -230,7 +262,7 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
             card.bottom_alpha = ( card.comment_x / ( ScrW() * 2 ) ) * 255
         end
 
-        MW2CC:DrawCallCard( card.cur_pos, 70, card.ent, card.comment, card.comment_x, card.banner_mat, card.emblem_mat, card.bottom_alpha )
+        MW2CC:DrawCallCard( card )
 
         break
     end
