@@ -56,6 +56,10 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
     else
         local mdl = ent:GetModel()
         tbl.pfp = Material( "spawnicons/" .. string.sub( mdl, 1, #mdl - 4 ) .. ".png" )
+
+        if tbl.pfp:IsError() then
+            tbl.pfp = Material( "entities/" .. ent:GetClass() .. ".png" )
+        end
     end
 
     -- Assign the card to the correct queue
