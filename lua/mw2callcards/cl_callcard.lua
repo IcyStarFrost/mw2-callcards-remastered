@@ -109,7 +109,7 @@ function MW2CC:GetMaterial( path )
         })
         self.VTFindex = self.VTFindex + 1
     else
-        mat = Material( path )
+        mat = Material( path, "smooth" )
     end
 
     return mat

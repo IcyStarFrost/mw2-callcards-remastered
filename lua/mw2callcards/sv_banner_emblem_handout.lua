@@ -15,3 +15,16 @@ hook.Add( "OnEntityCreated", "mw2cc_cosmeticassignment", function( ent )
         ent.mw2cc_emblem = MW2CC:GetRandomEmblem()
     end )
 end )
+
+net.Receive( "mw2cc_net_clientsendcosmetics", function( len, ply )
+    local banner = net.ReadString()
+    local emblem = net.ReadString()
+
+    if banner != "" then
+        ply.mw2cc_banner = banner
+    end
+
+    if emblem != "" then
+        ply.mw2cc_emblem = emblem
+    end
+end )

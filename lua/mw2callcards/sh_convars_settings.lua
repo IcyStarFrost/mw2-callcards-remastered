@@ -59,6 +59,9 @@ if CLIENT then
 
             pnl:Button( "Preview Announcement Card", "mw2cc_previewannouncement" )
             pnl:Button( "Preview Kill Card", "mw2cc_previewkill" )
+            pnl:Button( "Change Banner", "mw2cc_openbannerpanel" )
+            pnl:Button( "Change Emblem", "mw2cc_openemblempanel" )
+            
             
         end )
     end )
