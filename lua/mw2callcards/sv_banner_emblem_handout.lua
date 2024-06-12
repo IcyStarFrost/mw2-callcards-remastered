@@ -1,10 +1,14 @@
 function MW2CC:GetRandomBanner()
     local files = file.Find( "materials/mw2cc/titles/*", "GAME" )
+    local custom_files = file.Find( "materials/mw2cc/custom/titles/*", "GAME" )
+    table.Add( files, custom_files )
     return "mw2cc/titles/" .. files[ math.random( #files ) ]
 end
 
 function MW2CC:GetRandomEmblem()
     local files = file.Find( "materials/mw2cc/emblems/*", "GAME" )
+    local custom_files = file.Find( "materials/mw2cc/custom/emblems/*", "GAME" )
+    table.Add( files, custom_files )
     return "mw2cc/emblems/" .. files[ math.random( #files ) ]
 end
 
