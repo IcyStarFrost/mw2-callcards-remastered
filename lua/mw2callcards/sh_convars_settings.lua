@@ -1,5 +1,6 @@
 MW2CC.ConVars = {}
 
+-- Convenience system for handling convars and spawnmenu settings
 function MW2CC:ConVar( optionname, name, value, clientside, type, helptext, min, max, decimals )
     local cvar
     if clientside and CLIENT then
@@ -43,6 +44,7 @@ if CLIENT then
 
             pnl:Help( "Modern Warfare 2009 Call Cards Remastered" )
 
+            -- I only needed sliders and bools
             for k, v in ipairs( MW2CC.ConVars ) do
                 local clr = v.clientside and clientcolor or servercolor
                 local prefix = v.clientside and "Client-Side | " or "Server-Side | "
