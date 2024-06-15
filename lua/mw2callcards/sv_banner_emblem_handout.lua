@@ -1,3 +1,5 @@
+-- Simply a system to hand out random banners and emblems to entities
+
 function MW2CC:GetRandomBanner()
     local files = file.Find( "materials/mw2cc/titles/*", "GAME" )
     local custom_files = file.Find( "materials/mw2cc/custom/titles/*", "GAME" )

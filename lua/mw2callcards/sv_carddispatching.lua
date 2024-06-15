@@ -1,5 +1,10 @@
 
 -- Sends a call card to a specified player or every player
+-- ent              | Entity |          The entity that will hold this callcard. Assigns names and picture automatically
+-- comment          | String |          The thing that the holder did. For example, "DOUBLE KILL!"
+-- killcard         | Bool or nil |     Whether this card should render as a kill card or not
+-- snd              | String or "" for no sound |   The sound effect to play instead of the default
+
 -- sndpath can be nil for the default sound or a sound path for a custom sound. input "none" if no sound should play
 function MW2CC:DispatchCallCard( ent, comment, killcard, ply, sndpath )
     net.Start( "mw2cc_net_dispatchcard" )
@@ -16,10 +21,11 @@ end
 function MW2CC:EntKilled( victim, attacker )
     victim.mw2cc_killstreak = 0
 
-    if victim == attacker then return end
+    if victim == attacker then return end -- You don't get killstreaks by killing yourself
     
-    attacker.mw2cc_killstreak = attacker.mw2cc_killstreak and attacker.mw2cc_killstreak + 1 or 1
+    attacker.mw2cc_killstreak = attacker.mw2cc_killstreak and attacker.mw2cc_killstreak + 1 or 1 -- Increment the ent's killstreak
 
+    -- Kill Cards --
     if attacker:IsPlayer() then
         MW2CC:DispatchCallCard( victim, "Killed", true, attacker )
     end
@@ -27,7 +33,9 @@ function MW2CC:EntKilled( victim, attacker )
     if victim:IsPlayer() then
         MW2CC:DispatchCallCard( attacker, "Killed By", true, victim )
     end
+    ----------------
 
+    -- Variable system that tracks multi kills --
     attacker.mw2cc_rapidkills = attacker.mw2cc_rapidkills and 
     CurTime() < attacker.mw2cc_rapidkills.timeout and 
     attacker.mw2cc_rapidkills or { timeout = CurTime() + 0.5, kills = 0, ignoreents = {} }
@@ -49,17 +57,22 @@ function MW2CC:EntKilled( victim, attacker )
             MW2CC:DispatchCallCard( attacker, "Multi Kill!" )
         end
     end )
+    -----------------------------------------------------
 
     if victim:GetClass() == "npc_strider" then
         MW2CC:DispatchCallCard( attacker, "DESTROYED STRIDER!" )
     end
 
+    -- If you look at the old code for dispatching killstreak announcements, you can tell this is light years better.
+    -- Killstreak modulus allows for custom killstreak thresholds
     if attacker.mw2cc_killstreak % GetConVar( "mw2cc_killstreakthreshold" ):GetInt() == 0 then
         self:DispatchCallCard( attacker, string.CardinalToOrdinal( attacker.mw2cc_killstreak ):upper() .. " KILLSTREAK!" )
         hook.Run( "MW2CC_OnKillstreak", attacker, attacker.mw2cc_killstreak )
     end
 end
 
+
+-- Top of the chain --
 hook.Add( "PlayerDeath", "mw2cc_playerdeath", function( victim, inf, attacker ) 
     MW2CC:EntKilled( victim, attacker )
 end )
@@ -74,3 +87,4 @@ end )
 hook.Add( "LambdaOnKilled", "mw2cc_lambdaonkilled", function( lambda, dmg )
     MW2CC:EntKilled( lambda, dmg:GetAttacker() )
 end )
+--------------------------
