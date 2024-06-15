@@ -47,6 +47,8 @@ function MW2CC:OpenCosmeticPanel( ply, type, name )
     customlbl:SetSize( 1, 70 )
     customlbl:Dock( TOP )
 
+
+
     tabs:AddSheet( "Default " .. type .. "s", default_listview, "materials/icon16/folder.png" )
     tabs:AddSheet( "Custom " .. type .. "s", custompnl, "materials/icon16/folder_add.png" )
 
@@ -66,28 +68,32 @@ function MW2CC:OpenCosmeticPanel( ply, type, name )
     rightpnl:SetSize( w / 2, h / 2 )
     rightpnl:Dock( LEFT )
 
+    local curtext = vgui.Create( "DLabel", rightpnl )
+    curtext:SetText( "Current " .. type .. ": " .. current_cosmetic )
+    curtext:SetSize( h / 2, 30 )
+    curtext:Dock( TOP )
+
+
     local smallpnl = vgui.Create( "DPanel", rightpnl )
     smallpnl:SetSize( 64, 64 )
     smallpnl:Dock( TOP )
 
     local image = vgui.Create( "DImage", rightpnl )
     image:SetSize( w / 2, type == "banner" and 100 or h / 2 )
+    image:DockMargin( 0, 30, 0, 0 )
     image:Dock( TOP )
 
-    local curtext = vgui.Create( "DLabel", smallpnl )
-    curtext:SetText( "Current " .. type .. ": " .. current_cosmetic )
-    curtext:SetSize( h / 2, 1 )
-    curtext:Dock( LEFT )
-
     local curimage = vgui.Create( "DImage", smallpnl )
-    curimage:SetSize( type == "emblem" and 64 or 140, type == "emblem" and 64 or 140 )
-    curimage:Dock( LEFT )
+    curimage:SetSize( 1, 1 )
+    curimage:DockMargin( type == "emblem" and smallpnl:GetWide() * 2 or 0, 0, type == "emblem" and smallpnl:GetWide() * 2 or 0, 0 )
+    curimage:Dock( FILL )
     curimage:SetMaterial( MW2CC:GetMaterial( current_cosmetic ) )
     
     local setnew = vgui.Create( "DButton", rightpnl )
     setnew:SetText( "Save new " .. type )
     setnew:SetSize( 10, 25 )
     setnew:Dock( TOP )
+    
 
     function setnew:DoClick()
         local filestr = file.Read( "mw2cc_data/data.json", "DATA" )
