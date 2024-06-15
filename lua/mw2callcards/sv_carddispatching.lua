@@ -3,9 +3,11 @@
 -- ent              | Entity |          The entity that will hold this callcard. Assigns names and picture automatically
 -- comment          | String |          The thing that the holder did. For example, "DOUBLE KILL!"
 -- killcard         | Bool or nil |     Whether this card should render as a kill card or not
+-- ply              | Player or nil |   The player to only send the card to. 
 -- snd              | String or "" for no sound |   The sound effect to play instead of the default
 
 -- sndpath can be nil for the default sound or a sound path for a custom sound. input "none" if no sound should play
+-- Previous callcard addon wasn't really dev friendly. This one is. 
 function MW2CC:DispatchCallCard( ent, comment, killcard, ply, sndpath )
     net.Start( "mw2cc_net_dispatchcard" )
     net.WriteEntity( ent )
