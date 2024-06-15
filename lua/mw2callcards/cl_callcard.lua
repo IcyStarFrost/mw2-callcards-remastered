@@ -1,10 +1,23 @@
 file.CreateDir( "mw2cc_data" )
 
+-- Previously with the old MW2 call cards, there was absolutely no queue system which meant if a card attempted to show whilest one is active,
+-- The new card would be discarded and the credit to the holder ent would be lost
+
 MW2CC.QueuedCards = MW2CC.QueuedCards or {}
 MW2CC.QueuedKillCards = MW2CC.QueuedKillCards or {}
 MW2CC.VTFindex = MW2CC.VTFindex or 0
 
+local green = Color( 122, 255, 122)
+local green_glow = Color( 0, 197, 0, 166)
+
 -- Dispatches a call card
+
+-- ent              | Entity |          The entity that will hold this callcard. Assigns names and picture automatically
+-- comment          | String |          The thing that the holder did. For example, "DOUBLE KILL!"
+-- banner_path      | String |          The file path relative to the materials folder to a .jpg, .png, or .vtf. Animated VTFs are supported
+-- emblem_path      | String |          Same as banner_path. Animated VTFs are supported
+-- killcard         | Bool or nil |     Whether this card should render as a kill card or not
+-- snd              | String or "" for no sound |   The sound effect to play instead of the default
 function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard, snd )
     local tbl = { 
         ent = ent, 
@@ -72,28 +85,6 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
     end
 end
 
-net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
-    local ent = net.ReadEntity()
-    if !IsValid( ent ) then return end
-    local banner = net.ReadString()
-    local emblem = net.ReadString()
-    local comment = net.ReadString()
-    local snd = net.ReadString()
-    local killcard = net.ReadBool()
-
-    if !killcard and !GetConVar( "mw2cc_allowannouncecards" ):GetBool() then return end
-    if killcard and !GetConVar( "mw2cc_allowkillcards" ):GetBool() then return end
-
-    local path = snd == "" and "mw2cc/mp_cardslide_v6.wav" or snd == "none" and "" or snd
-
-    local banner_path = banner != "nil" and banner or nil
-    local emblem_path = emblem != "nil" and emblem or nil
-    MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard, path )
-end )
-
-local green = Color( 122, 255, 122)
-local green_glow = Color( 0, 197, 0, 166)
-
 -- Returns a Material from the given path. Supports .VTF files that are animated
 function MW2CC:GetMaterial( path )
     local mat 
@@ -123,7 +114,7 @@ local function GetPlayerAvatarMaterial(ply, callback)
     local steamID64 = ply:SteamID64()
 
     http.Fetch( "https://steamcommunity.com/profiles/" .. steamID64 .. "?xml=1", function( body, len, headers, code )
-        -- Shame.
+        -- Shame. No 4k HD RTX enabled profile pictures
         if code != 200 then
             return
         end
@@ -146,8 +137,8 @@ end
 
 
 function MW2CC:DrawCallCard( card )
-    
-    card.lastdraw = CurTime()
+
+    card.lastdraw = CurTime() -- Used to remove VGUI elements if this card isn't drawn anymore
     
     local w = 370
     local h = 100
@@ -308,4 +299,23 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
 
         break
     end
+end )
+
+net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
+    local ent = net.ReadEntity()
+    if !IsValid( ent ) then return end
+    local banner = net.ReadString()
+    local emblem = net.ReadString()
+    local comment = net.ReadString()
+    local snd = net.ReadString()
+    local killcard = net.ReadBool()
+
+    if !killcard and !GetConVar( "mw2cc_allowannouncecards" ):GetBool() then return end
+    if killcard and !GetConVar( "mw2cc_allowkillcards" ):GetBool() then return end
+
+    local path = snd == "" and "mw2cc/mp_cardslide_v6.wav" or snd == "none" and "" or snd
+
+    local banner_path = banner != "nil" and banner or nil
+    local emblem_path = emblem != "nil" and emblem or nil
+    MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard, path )
 end )
