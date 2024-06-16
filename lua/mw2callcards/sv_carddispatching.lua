@@ -29,7 +29,7 @@ function MW2CC:EntKilled( victim, attacker )
 
     -- Kill Cards --
     if attacker:IsPlayer() then
-        MW2CC:DispatchCallCard( victim, "Killed", true, attacker )
+        MW2CC:DispatchCallCard( victim, "You Killed", true, attacker )
     end
 
     if victim:IsPlayer() then

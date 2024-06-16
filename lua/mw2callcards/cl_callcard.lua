@@ -27,6 +27,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         target_y = ScrH() * GetConVar( "mw2cc_killy" ):GetFloat(),
         bottom_alpha = 255,
         snd = snd,
+        flip = GetConVar( "mw2cc_flipemblem" ):GetBool() ,
         
         played_snd = false,
     }
@@ -174,8 +175,8 @@ function MW2CC:DrawCallCard( card )
     -- Picture
     if card.ent:IsPlayer() and !IsValid( card.mw2cc_pfp ) and !card.hashdpfp then
         card.mw2cc_pfp = vgui.Create( "AvatarImage", GetHUDPanel() )
-        card.mw2cc_pfp:SetPos( x + w - 90, y + h - 90  )
-        card.mw2cc_pfp:SetSize( 80, 80 )
+        card.mw2cc_pfp:SetPos( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h - 90 )
+        card.mw2cc_pfp:SetSize( !card.flip and 80 or 25, !card.flip and 80 or 25 )
         card.mw2cc_pfp:SetPlayer( card.ent )
         
         function card.mw2cc_pfp:Think()
@@ -193,24 +194,24 @@ function MW2CC:DrawCallCard( card )
             card.mw2cc_pfp:Remove()
         end )
     elseif card.ent:IsPlayer() and card.hashdpfp then -- Use the higher quality profile picture
-        surface.SetDrawColor( 255, 255, 255 )
+        surface.SetDrawColor( 255, 255, 255, !card.flip and 255 or 255 * ( card.bottom_alpha / 255 ) )
         surface.SetMaterial( card.hdpfp )
-        surface.DrawTexturedRect( x + w - 90, y + h - 90, 80, 80 )
+        surface.DrawTexturedRect( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h + 3, !card.flip and 80 or 25, !card.flip and 80 or 25 )
     else
         surface.SetDrawColor( 255, 255, 255 )
         surface.SetMaterial( card.pfp )
-        surface.DrawTexturedRect( x + w - 90, y + h - 90, 80, 80 )
+        surface.DrawTexturedRect( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h + 3, !card.flip and 80 or 25, !card.flip and 80 or 25 )
     end
 
     if IsValid( card.mw2cc_pfp ) then
-        card.mw2cc_pfp:SetPos( x + w - 90, y + h - 90 )
+        card.mw2cc_pfp:SetPos( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h + 3 )
     end
     ----------
 
     -- Emblem
-    surface.SetDrawColor( 255, 255, 255, 255 * ( card.bottom_alpha / 255 ))
+    surface.SetDrawColor( 255, 255, 255, !card.flip and 255 * ( card.bottom_alpha / 255 ) or 255 )
     surface.SetMaterial( card.emblem_mat )
-    surface.DrawTexturedRect( x + w - 30, y + h + 3, 25, 25 )
+    surface.DrawTexturedRect( !card.flip and x + w - 30 or x + w - 90, !card.flip and y + h + 3 or y + h - 90, !card.flip and 25 or 80, !card.flip and 25 or 80 )
 
     -- Banner
     surface.SetDrawColor( 255, 255, 255)
