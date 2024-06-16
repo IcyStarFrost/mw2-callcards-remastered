@@ -16,3 +16,12 @@ A complete rewrite of the old MW2 call cards addon. This rewrite most notably im
 - Cleaner code
 - Better user experience when selecting new banners/emblems
 - Support for animated VTF files
+
+
+## How to add custom banners/emblems
+To add custom emblems, go to and create the directories seen here and place .jpg, .png, and .vtf files in the `emblems` folder: `GarrysMod\sourceengine\materials\mw2cc\custom\emblems`
+Likewise for banners, create the directories seen here and place .jpg, .png, and .vtf files in the `banners` folder: `GarrysMod\sourceengine\materials\mw2cc\custom\banners`
+
+Addon creators can share their banners/emblems by simply using the file paths shown. For example, `addonname\materials\mw2cc\custom\emblems`
+
+![image](https://github.com/IcyStarFrost/mw2-callcards-remastered/assets/109770359/2f863417-b6f2-435f-a50c-01fd34179e83)
