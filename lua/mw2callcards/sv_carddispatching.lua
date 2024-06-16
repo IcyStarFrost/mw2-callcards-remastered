@@ -3,7 +3,7 @@
 -- ent              | Entity |          The entity that will hold this callcard. Assigns names and picture automatically
 -- comment          | String |          The thing that the holder did. For example, "DOUBLE KILL!"
 -- killcard         | Bool or nil |     Whether this card should render as a kill card or not
--- ply              | Player or nil |   The player to only send the card to. 
+-- ply              | Player or nil |   The player to only send the card to. Set to nil if it should be sent to everyone
 -- snd              | String or "" for no sound |   The sound effect to play instead of the default
 
 -- sndpath can be nil for the default sound or a sound path for a custom sound. input "none" if no sound should play
