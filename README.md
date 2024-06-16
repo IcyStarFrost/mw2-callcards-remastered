@@ -4,7 +4,7 @@ A complete rewrite of the old MW2 call cards addon. This rewrite most notably im
 ![image](https://github.com/IcyStarFrost/mw2-callcards-remastered/assets/109770359/abf8201a-2915-48ee-ac46-c05c84604fb4)
 
 *Visuals resemble MW2 more accurately*
-
+***
 ![image](https://github.com/IcyStarFrost/mw2-callcards-remastered/assets/109770359/a2dbddee-ddc5-4204-b0e6-65011a57cd30)
 
 *An easy to use panel to select banners/emblems with previews*
