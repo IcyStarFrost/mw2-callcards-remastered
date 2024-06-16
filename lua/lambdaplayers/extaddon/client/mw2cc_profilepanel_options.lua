@@ -1,29 +1,12 @@
-function MW2CC:GetRandomBanner()
-    local files = file.Find( "materials/mw2cc/titles/*", "GAME" )
-    return "mw2cc/titles/" .. files[ math.random( #files ) ]
-end
-
-function MW2CC:GetRandomEmblem()
-    local files = file.Find( "materials/mw2cc/emblems/*", "GAME" )
-    return "mw2cc/emblems/" .. files[ math.random( #files ) ]
-end
-
-if !file.Exists( "mw2cc_data/data.json", "DATA" ) then
-    file.Write( "mw2cc_data/data.json", util.TableToJSON( {banner = MW2CC:GetRandomBanner(), emblem = MW2CC:GetRandomEmblem()} ) )
-end
-
-function MW2CC:OpenCosmeticPanel( ply, type )
+local function OpenCosmeticSelectionPanel( ply, type, pnltoedit )
     local main = vgui.Create( "DFrame", GetHUDPanel() )
     local w, h = 700, 400
     main:SetSize( w, h )
     main:Center()
-    main:SetTitle( "MW2CC " .. type .. " editor" )
+    main:SetTitle( "MW2CC " .. type .. " selector" )
     main:MakePopup()
 
-    local filestr = file.Read( "mw2cc_data/data.json", "DATA" )
-    local tbl = util.JSONToTable( filestr )
-
-    local current_cosmetic = tbl[ type ]
+    local current_cosmetic = type == "emblem" and "mw2cc/emblems/AC-130_Angel_Flares_Emblem_MW2.png" or "mw2cc/titles/1st_Lt._title_MW2.png"
     local cosmetic_path = type == "banner" and "materials/mw2cc/titles" or "materials/mw2cc/emblems"
 
     local tabs = vgui.Create( "DPropertySheet", main )
@@ -47,8 +30,6 @@ function MW2CC:OpenCosmeticPanel( ply, type )
     customlbl:SetSize( 1, 70 )
     customlbl:Dock( TOP )
 
-
-
     tabs:AddSheet( "Default " .. type .. "s", default_listview, "materials/icon16/folder.png" )
     tabs:AddSheet( "Custom " .. type .. "s", custompnl, "materials/icon16/folder_add.png" )
 
@@ -68,12 +49,6 @@ function MW2CC:OpenCosmeticPanel( ply, type )
     rightpnl:SetSize( w / 2, h / 2 )
     rightpnl:Dock( LEFT )
 
-    local curtext = vgui.Create( "DLabel", rightpnl )
-    curtext:SetText( "Current " .. type .. ": " .. current_cosmetic )
-    curtext:SetSize( h / 2, 30 )
-    curtext:Dock( TOP )
-
-
     local smallpnl = vgui.Create( "DPanel", rightpnl )
     smallpnl:SetSize( 64, 64 )
     smallpnl:Dock( TOP )
@@ -83,33 +58,16 @@ function MW2CC:OpenCosmeticPanel( ply, type )
     image:DockMargin( 0, 30, 0, 0 )
     image:Dock( TOP )
 
-    local curimage = vgui.Create( "DImage", smallpnl )
-    curimage:SetSize( 1, 1 )
-    curimage:DockMargin( type == "emblem" and smallpnl:GetWide() * 2 or 0, 0, type == "emblem" and smallpnl:GetWide() * 2 or 0, 0 )
-    curimage:Dock( FILL )
-    curimage:SetMaterial( MW2CC:GetMaterial( current_cosmetic ) )
-    
     local setnew = vgui.Create( "DButton", rightpnl )
-    setnew:SetText( "Save new " .. type )
+    setnew:SetText( "Select " .. type )
     setnew:SetSize( 10, 25 )
     setnew:Dock( TOP )
     
 
     function setnew:DoClick()
-        local filestr = file.Read( "mw2cc_data/data.json", "DATA" )
-        local tbl = util.JSONToTable( filestr )
-        tbl[ type ] = current_cosmetic
-        curtext:SetText( "Current " .. type .. ": " .. current_cosmetic )
-        file.Write( "mw2cc_data/data.json", util.TableToJSON( tbl ) )
-
+        pnltoedit:SetText( current_cosmetic )
         surface.PlaySound( "buttons/button14.wav" )
-
-        net.Start( "mw2cc_net_clientsendcosmetics" )
-        net.WriteString( type == "banner" and current_cosmetic or "" )
-        net.WriteString( type == "emblem" and current_cosmetic or "" )
-        net.SendToServer()
-        
-        curimage:SetMaterial( MW2CC:GetMaterial( current_cosmetic ) )
+        main:Close()
     end
 
     local function OnRowSelected( self, id, line )
@@ -124,20 +82,41 @@ function MW2CC:OpenCosmeticPanel( ply, type )
 
 end
 
-concommand.Add( "mw2cc_openbannerpanel", function( ply )
-    MW2CC:OpenCosmeticPanel( ply, "banner" )
+
+LambdaCreateProfileSetting( "DTextEntry", "mw2cc_banner", "MW2 Call Cards", function( pnl, parent )
+    pnl:SetZPos( 99 )
+    local lbl = LAMBDAPANELS:CreateLabel( "[ Banner Path ]\nThe file path to a MW2CC banner relative to the materials folder for this lambda to always have\nExample: mw2cc/titles/DzClear.png\n\nRefer to MW2CC's Change Banner/Emblem panels for file paths.", parent, TOP )
+    lbl:SetSize( 100, 100 )
+    lbl:SetParent( parent )
+    lbl:Dock( TOP )
+    lbl:SetWrap( true )
+    lbl:SetZPos( 98 )
+
+    local button = vgui.Create( "DButton", parent )
+    button:Dock( TOP )
+    button:SetText( "Select Banner" )
+    button:SetZPos( 100 )
+    
+    function button:DoClick()
+        OpenCosmeticSelectionPanel( LocalPlayer(), "banner", pnl )
+    end
 end )
 
-concommand.Add( "mw2cc_openemblempanel", function( ply )
-    MW2CC:OpenCosmeticPanel( ply, "emblem" )
-end )
+LambdaCreateProfileSetting( "DTextEntry", "mw2cc_emblem", "MW2 Call Cards", function( pnl, parent )
+    pnl:SetZPos( 96 )
+    local lbl = LAMBDAPANELS:CreateLabel( "[ Emblem Path ]\nThe file path to a MW2CC emblem relative to the materials folder for this lambda to always have\nExample: mw2cc/emblems/Ghost_Bust_emblem_MW2.png", parent, TOP )
+    lbl:SetSize( 100, 100 )
+    lbl:SetParent( parent )
+    lbl:Dock( TOP )
+    lbl:SetWrap( true )
+    lbl:SetZPos( 95 )
 
-hook.Add( "InitPostEntity", "mw2cc_sendcosmetics", function()
-    local filestr = file.Read( "mw2cc_data/data.json", "DATA" )
-    local tbl = util.JSONToTable( filestr )
+    local button = vgui.Create( "DButton", parent )
+    button:Dock( TOP )
+    button:SetText( "Select Emblem" )
+    button:SetZPos( 97 )
 
-    net.Start( "mw2cc_net_clientsendcosmetics" )
-    net.WriteString( tbl.banner )
-    net.WriteString( tbl.emblem )
-    net.SendToServer()
+    function button:DoClick()
+        OpenCosmeticSelectionPanel( LocalPlayer(), "emblem", pnl )
+    end
 end )
