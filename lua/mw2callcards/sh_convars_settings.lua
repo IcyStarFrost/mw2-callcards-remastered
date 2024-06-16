@@ -46,7 +46,7 @@ if CLIENT then
     hook.Add( "PopulateToolMenu", "mw2cc_spawnmenu_options", function()
         spawnmenu.AddToolMenuOption( "Utilities", "MW2CC Options", "mw2cc_options", "Options", "", "", function( pnl )
 
-            pnl:Help( "Modern Warfare 2009 Call Cards Remastered" )
+            pnl:Help( "Modern Warfare 2 2009 Call Cards Remastered" )
 
             -- I only needed sliders and bools
             for k, v in ipairs( MW2CC.ConVars ) do
