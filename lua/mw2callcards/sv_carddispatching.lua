@@ -66,7 +66,7 @@ function MW2CC:EntKilled( victim, attacker )
     end
 
     -- If you look at the old code for dispatching killstreak announcements, you can tell this is light years better.
-    -- Killstreak modulus allows for custom killstreak thresholds
+    -- Killstreak modulus allows for custom killstreak thresholds and takes up less lines
     if attacker.mw2cc_killstreak % GetConVar( "mw2cc_killstreakthreshold" ):GetInt() == 0 then
         self:DispatchCallCard( attacker, string.CardinalToOrdinal( attacker.mw2cc_killstreak ):upper() .. " KILLSTREAK!" )
         hook.Run( "MW2CC_OnKillstreak", attacker, attacker.mw2cc_killstreak )
