@@ -1,16 +1,29 @@
 -- Simply a system to hand out random banners and emblems to entities
 
-function MW2CC:GetRandomBanner()
-    local files = file.Find( "materials/mw2cc/titles/*", "GAME" )
+function MW2CC:GetAssets( usecache )
+    if self.assets and usecache then return self.assets end
+    local assets = {}
+    self.assets = assets
+
+    local banners = file.Find( "materials/mw2cc/titles/*", "GAME" )
     local custom_files = file.Find( "materials/mw2cc/custom/titles/*", "GAME" )
-    table.Add( files, custom_files )
+    table.Add( banners, custom_files )
+    assets.banners = banners
+
+    local emblems = file.Find( "materials/mw2cc/emblems/*", "GAME" )
+    custom_files = file.Find( "materials/mw2cc/custom/emblems/*", "GAME" )
+    table.Add( emblems, custom_files )
+    assets.emblems = emblems
+    return assets
+end
+
+function MW2CC:GetRandomBanner()
+    local files = self:GetAssets( true ).banners
     return "mw2cc/titles/" .. files[ math.random( #files ) ]
 end
 
 function MW2CC:GetRandomEmblem()
-    local files = file.Find( "materials/mw2cc/emblems/*", "GAME" )
-    local custom_files = file.Find( "materials/mw2cc/custom/emblems/*", "GAME" )
-    table.Add( files, custom_files )
+    local files = self:GetAssets( true ).emblems
     return "mw2cc/emblems/" .. files[ math.random( #files ) ]
 end
 

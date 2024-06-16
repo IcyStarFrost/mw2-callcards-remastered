@@ -31,6 +31,12 @@ concommand.Add( "mw2cc_previewannouncement", function( ply )
     MW2CC:DispatchCallCard( ply, "PREVIEW TEST", false, ply )
 end )
 
+concommand.Add( "mw2cc_reloadassets", function( ply )
+    if !ply:IsSuperAdmin() then return end
+    MW2CC.assets = MW2CC:GetAssets()
+    PrintMessage( HUD_PRINTTALK, "MW2CC: Assets reloaded")
+end )
+
 concommand.Add( "mw2cc_previewkill", function( ply )
     MW2CC:DispatchCallCard( ply, "KILL TEST", true, ply )
 end )
@@ -68,6 +74,8 @@ if CLIENT then
             pnl:Button( "Preview Kill Card", "mw2cc_previewkill" )
             pnl:Button( "Change Banner", "mw2cc_openbannerpanel" )
             pnl:Button( "Change Emblem", "mw2cc_openemblempanel" )
+            pnl:Button( "Reload Assets", "mw2cc_reloadassets" )
+            pnl:ControlHelp( "For performance reasons, you must reload assets in order for new custom banners/emblems to be randomly applied onto entities" )
             
             
         end )
