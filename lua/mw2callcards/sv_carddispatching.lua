@@ -76,17 +76,29 @@ end
 
 -- Top of the chain --
 hook.Add( "PlayerDeath", "mw2cc_playerdeath", function( victim, inf, attacker ) 
+    if attacker:IsNPC() and !GetConVar( "mw2cc_allownpcs" ):GetBool() or attacker:IsNextBot() and !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
+    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !GetConVar( "mw2cc_allowotherents" ):GetBool() then return end
+
     MW2CC:EntKilled( victim, attacker )
 end )
 
+
 hook.Add( "PostEntityTakeDamage", "mw2cc_postentitytakedamage", function( ent, dmg )
+    local attacker = dmg:GetAttacker()
     if !ent:IsNPC() and !ent:IsNextBot() or ent:IsPlayer() or ent:Health() > 0 or ent.mw2cc_ignore then return end
+    if attacker:IsNPC() and !GetConVar( "mw2cc_allownpcs" ):GetBool() or attacker:IsNextBot() and !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
+    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !GetConVar( "mw2cc_allowotherents" ):GetBool() then return end
 
     ent.mw2cc_ignore = true
-    MW2CC:EntKilled( ent, dmg:GetAttacker() )
+    MW2CC:EntKilled( ent, attacker )
 end )
 
 hook.Add( "LambdaOnKilled", "mw2cc_lambdaonkilled", function( lambda, dmg )
-    MW2CC:EntKilled( lambda, dmg:GetAttacker() )
+    local attacker = dmg:GetAttacker()
+    if !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
+    if attacker:IsNPC() and !GetConVar( "mw2cc_allownpcs" ):GetBool() or attacker:IsNextBot() and !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
+    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !GetConVar( "mw2cc_allowotherents" ):GetBool() then return end
+
+    MW2CC:EntKilled( lambda, attacker )
 end )
 --------------------------

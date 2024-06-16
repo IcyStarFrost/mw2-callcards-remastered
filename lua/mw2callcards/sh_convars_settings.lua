@@ -15,6 +15,10 @@ end
 
 MW2CC:ConVar( "Allow Announcement Cards", "mw2cc_allowannouncecards", 1, true, "bool", "If announcement cards are allowed to be displayed. I.e killstreak announcements, ect", 0, 1 )
 MW2CC:ConVar( "Allow Kill Cards", "mw2cc_allowkillcards", 1, true, "bool", "If kill cards are allowed to be displayed", 0, 1 )
+MW2CC:ConVar( "Allow NPCs", "mw2cc_allownpcs", 1, false, "bool", "If multikills/killstreaks are allowed to show for base game NPCs. I.e Combine soldiers", 0, 1 )
+MW2CC:ConVar( "Allow Nextbots", "mw2cc_allownextbots", 1, false, "bool", "If multikills/killstreaks are allowed to show for nextbots", 0, 1 )
+MW2CC:ConVar( "Allow Other Ents", "mw2cc_allowotherents", 1, false, "bool", "If multikills/killstreaks are allowed to show for entities such as props", 0, 1 )
+
 MW2CC:ConVar( "Killstreak Threshold", "mw2cc_killstreakthreshold", 5, false, "slider", "The amount of kills needed without dying before a killstreak announcement is made", 1, 50, 0 )
 
 MW2CC:ConVar( "Announce Card Y", "mw2cc_announcey", 0.036, true, "slider", "The verticle position of the announce cards as a percentage of your screen size", 0, 1, 3 )
