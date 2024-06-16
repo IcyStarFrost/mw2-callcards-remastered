@@ -73,6 +73,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
         tbl.pfp = MW2CC:GetMaterial( zeta:GetNW2String("zeta_profilepicture","none") )
     else
         local mdl = ent:GetModel()
+        if !mdl then return end
         tbl.pfp = Material( "spawnicons/" .. string.sub( mdl, 1, #mdl - 4 ) .. ".png" )
 
         if tbl.pfp:IsError() then
