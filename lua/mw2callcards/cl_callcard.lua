@@ -1,5 +1,3 @@
-file.CreateDir( "mw2cc_data" )
-
 -- Previously with the old MW2 call cards, there was absolutely no queue system which meant if a card attempted to show whilest one is active,
 -- The new card would be discarded and the credit to the holder ent would be lost
 

@@ -8,6 +8,8 @@ function MW2CC:GetRandomEmblem()
     return "mw2cc/emblems/" .. files[ math.random( #files ) ]
 end
 
+file.CreateDir( "mw2cc_data" )
+
 if !file.Exists( "mw2cc_data/data.json", "DATA" ) then
     file.Write( "mw2cc_data/data.json", util.TableToJSON( {banner = MW2CC:GetRandomBanner(), emblem = MW2CC:GetRandomEmblem()} ) )
 end
