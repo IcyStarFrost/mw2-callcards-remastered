@@ -6,8 +6,8 @@ local function OpenCosmeticSelectionPanel( ply, type, pnltoedit )
     main:SetTitle( "MW2CC " .. type .. " selector" )
     main:MakePopup()
 
-    local current_cosmetic = type == "emblem" and "mw2cc/emblems/AC-130_Angel_Flares_Emblem_MW2.png" or "mw2cc/titles/1st_Lt._title_MW2.png"
-    local cosmetic_path = type == "banner" and "materials/mw2cc/titles" or "materials/mw2cc/emblems"
+    local current_cosmetic = type == "emblem" and "mw2cc/emblems/AC-130_Angel_Flares_Emblem_MW2.png" or "mw2cc/banners/1st_Lt._title_MW2.png"
+    local cosmetic_path = type == "banner" and "materials/mw2cc/banners" or "materials/mw2cc/emblems"
 
     local tabs = vgui.Create( "DPropertySheet", main )
     tabs:SetSize( w / 2, 1  )
@@ -85,7 +85,7 @@ end
 
 LambdaCreateProfileSetting( "DTextEntry", "mw2cc_banner", "MW2 Call Cards", function( pnl, parent )
     pnl:SetZPos( 99 )
-    local lbl = LAMBDAPANELS:CreateLabel( "[ Banner Path ]\nThe file path to a MW2CC banner relative to the materials folder for this lambda to always have\nExample: mw2cc/titles/DzClear.png\n\nRefer to MW2CC's Change Banner/Emblem panels for file paths.", parent, TOP )
+    local lbl = LAMBDAPANELS:CreateLabel( "[ Banner Path ]\nThe file path to a MW2CC banner relative to the materials folder for this lambda to always have\nExample: mw2cc/banners/DzClear.png\n\nRefer to MW2CC's Change Banner/Emblem panels for file paths.", parent, TOP )
     lbl:SetSize( 100, 100 )
     lbl:SetParent( parent )
     lbl:Dock( TOP )

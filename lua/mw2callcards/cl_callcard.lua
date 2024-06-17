@@ -52,7 +52,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
     end
 
     -- Prepare materials
-    tbl.banner_mat = MW2CC:GetMaterial( banner_path or "mw2cc/titles/DeathFromAbove.png" )
+    tbl.banner_mat = MW2CC:GetMaterial( banner_path or "mw2cc/banners/DeathFromAbove.png" )
     tbl.emblem_mat = MW2CC:GetMaterial( emblem_path or "mw2cc/emblems/spray.vtf" )
 
     -- Prepare name

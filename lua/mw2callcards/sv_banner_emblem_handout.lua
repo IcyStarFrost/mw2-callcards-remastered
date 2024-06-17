@@ -6,9 +6,9 @@ function MW2CC:GetAssets( usecache )
     self.assets = assets
 
     -- Banners --
-    local banners = file.Find( "materials/mw2cc/titles/*", "GAME" )
+    local banners = file.Find( "materials/mw2cc/banners/*", "GAME" )
     for i = 1, #banners do
-        assets.banners[ #assets.banners + 1 ] = "mw2cc/titles/" .. banners[ i ]
+        assets.banners[ #assets.banners + 1 ] = "mw2cc/banners/" .. banners[ i ]
     end
     local custom_files = file.Find( "materials/mw2cc/custom/banners/*", "GAME" )
     for i = 1, #custom_files do

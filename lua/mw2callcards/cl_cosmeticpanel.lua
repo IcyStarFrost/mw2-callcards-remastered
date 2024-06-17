@@ -1,6 +1,6 @@
 function MW2CC:GetRandomBanner()
-    local files = file.Find( "materials/mw2cc/titles/*", "GAME" )
-    return "mw2cc/titles/" .. files[ math.random( #files ) ]
+    local files = file.Find( "materials/mw2cc/banners/*", "GAME" )
+    return "mw2cc/banners/" .. files[ math.random( #files ) ]
 end
 
 function MW2CC:GetRandomEmblem()
@@ -26,7 +26,7 @@ function MW2CC:OpenCosmeticPanel( ply, type )
     local tbl = util.JSONToTable( filestr )
 
     local current_cosmetic = tbl[ type ]
-    local cosmetic_path = type == "banner" and "materials/mw2cc/titles" or "materials/mw2cc/emblems"
+    local cosmetic_path = type == "banner" and "materials/mw2cc/banners" or "materials/mw2cc/emblems"
 
     local tabs = vgui.Create( "DPropertySheet", main )
     tabs:SetSize( w / 2, 1  )
