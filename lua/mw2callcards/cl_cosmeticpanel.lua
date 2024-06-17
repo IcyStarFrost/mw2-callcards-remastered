@@ -133,6 +133,10 @@ concommand.Add( "mw2cc_openemblempanel", function( ply )
 end )
 
 hook.Add( "InitPostEntity", "mw2cc_sendcosmetics", function()
+    if !file.Exists( "mw2cc_data/data.json", "DATA" ) then
+        file.Write( "mw2cc_data/data.json", util.TableToJSON( {banner = MW2CC:GetRandomBanner(), emblem = MW2CC:GetRandomEmblem()} ) )
+    end
+    
     local filestr = file.Read( "mw2cc_data/data.json", "DATA" )
     local tbl = util.JSONToTable( filestr )
 
