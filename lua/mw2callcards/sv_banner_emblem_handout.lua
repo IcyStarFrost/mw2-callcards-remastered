@@ -30,12 +30,12 @@ end
 
 function MW2CC:GetRandomBanner()
     local files = self:GetAssets( true ).banners
-    return "mw2cc/titles/" .. files[ math.random( #files ) ]
+    return files[ math.random( #files ) ]
 end
 
 function MW2CC:GetRandomEmblem()
     local files = self:GetAssets( true ).emblems
-    return "mw2cc/emblems/" .. files[ math.random( #files ) ]
+    return files[ math.random( #files ) ]
 end
 
 hook.Add( "OnEntityCreated", "mw2cc_cosmeticassignment", function( ent )
