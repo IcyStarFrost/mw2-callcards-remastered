@@ -132,7 +132,7 @@ local function GetPlayerAvatarMaterial(ply, callback)
             callback( mat )
 
             -- Don't need it anymore
-            timer.Simple( 0.5, function()
+            timer.Simple( 4, function()
                 file.Delete( "mw2cc_data/" .. steamID64 .. ".jpg" )
             end )
         end )
