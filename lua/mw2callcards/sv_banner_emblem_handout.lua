@@ -2,18 +2,29 @@
 
 function MW2CC:GetAssets( usecache )
     if self.assets and usecache then return self.assets end
-    local assets = {}
+    local assets = { banners = {}, emblems = {} }
     self.assets = assets
 
+    -- Banners --
     local banners = file.Find( "materials/mw2cc/titles/*", "GAME" )
+    for i = 1, #banners do
+        assets.banners[ #assets.banners + 1 ] = "mw2cc/titles/" .. banners[ i ]
+    end
     local custom_files = file.Find( "materials/mw2cc/custom/titles/*", "GAME" )
-    table.Add( banners, custom_files )
-    assets.banners = banners
+    for i = 1, #custom_files do
+        assets.banners[ #assets.banners + 1 ] = "mw2cc/custom/titles/" .. custom_files[ i ]
+    end
 
+    -- Emblems --
     local emblems = file.Find( "materials/mw2cc/emblems/*", "GAME" )
+    for i = 1, #emblems do
+        assets.emblems[ #assets.emblems + 1 ] = "mw2cc/custom/emblems/" .. emblems[ i ]
+    end
     custom_files = file.Find( "materials/mw2cc/custom/emblems/*", "GAME" )
-    table.Add( emblems, custom_files )
-    assets.emblems = emblems
+    for i = 1, #custom_files do
+        assets.emblems[ #assets.emblems + 1 ] = "mw2cc/custom/emblems/" .. custom_files[ i ]
+    end
+
     return assets
 end
 
