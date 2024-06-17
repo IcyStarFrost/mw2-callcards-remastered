@@ -42,6 +42,13 @@ concommand.Add( "mw2cc_previewkill", function( ply )
 end )
 
 if CLIENT then
+    concommand.Add( "mw2cc_clearqueue", function()
+        MW2CC.QueuedCards = {}
+        MW2CC.QueuedKillCards = {}
+    end )
+end
+
+if CLIENT then
 
     local clientcolor = Color( 255, 145, 0 )
     local servercolor = Color( 0, 174, 255 )
@@ -74,6 +81,7 @@ if CLIENT then
             pnl:Button( "Preview Kill Card", "mw2cc_previewkill" )
             pnl:Button( "Change Banner", "mw2cc_openbannerpanel" )
             pnl:Button( "Change Emblem", "mw2cc_openemblempanel" )
+            pnl:Button( "Clear Card Queue", "mw2cc_clearqueue" )
             pnl:Button( "Reload Assets", "mw2cc_reloadassets" )
             pnl:ControlHelp( "For performance reasons, you must reload assets in order for new custom banners/emblems to be randomly applied onto entities" )
             
