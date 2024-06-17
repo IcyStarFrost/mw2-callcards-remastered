@@ -31,12 +31,12 @@ function MW2CC:GetAssets( usecache )
 end
 
 function MW2CC:GetRandomBanner()
-    local files = self:GetAssets( false ).banners
+    local files = self:GetAssets( true ).banners
     return files[ math.random( #files ) ]
 end
 
 function MW2CC:GetRandomEmblem()
-    local files = self:GetAssets( false ).emblems
+    local files = self:GetAssets( true ).emblems
     return files[ math.random( #files ) ]
 end
 
