@@ -61,7 +61,7 @@ function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcar
     if tbl.ent.IsLambdaPlayer or tbl.ent:IsPlayer() then
         tbl.name = tbl.ent:Name():upper()
     elseif tbl.ent.IsZetaPlayer then
-        tbl.name = tbl.ent:GetNW2String('zeta_name',"Zeta Player")
+        tbl.name = tbl.ent:GetNW2String("zeta_name","Zeta Player")
     else
         tbl.name = language.GetPhrase( "#" .. tbl.ent:GetClass() )
     end
