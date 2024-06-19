@@ -172,8 +172,9 @@ function MW2CC:DrawCallCard( card )
     surface.SetDrawColor( 139, 139, 139, 40 * ( card.bottom_alpha / 255 ) )
     surface.DrawRect( x, y + h, w, pfpy )
     surface.SetDrawColor( 0, 0, 0, 255* ( card.bottom_alpha / 255 ))
-    surface.DrawOutlinedRect( x, y + h, w, pfpy, 1 )
+    surface.DrawOutlinedRect( x, y + h - 1, w, pfpy+1, 2 )
 
+    scanlines = scanlines * 0.3
     for i = 1, scanlines do 
         surface.SetDrawColor( 0, 0, 0, 150 * ( card.bottom_alpha / 255 ) )
         surface.DrawRect( x, ( y + h ) + ( pfpy * ( i / scanlines ) ), w, 1 )

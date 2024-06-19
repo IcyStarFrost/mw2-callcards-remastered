@@ -22,9 +22,9 @@ local function MW2CCLoadFonts(force)
         } )
 
         surface.CreateFont( "mw2callcard_commentfont", {
-            font = "BankGothic",
+            font = "Carbon Plus Bold",
             extended = false,
-            size = 30 * scale,
+            size = 36 * scale,
             weight = 500,
             blursize = 0,
             scanlines = 0,
@@ -40,9 +40,9 @@ local function MW2CCLoadFonts(force)
         } )
 
         surface.CreateFont( "mw2callcard_commentblurfont", {
-            font = "BankGothic",
+            font = "Carbon Plus Bold",
             extended = false,
-            size = 30 * scale,
+            size = 36 * scale,
             weight = 500,
             blursize = 5,
             scanlines = 0,
