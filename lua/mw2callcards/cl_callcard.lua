@@ -7,6 +7,10 @@ MW2CC.VTFindex = MW2CC.VTFindex or 0
 
 local green = Color( 122, 255, 122)
 local green_glow = Color( 0, 197, 0, 166)
+local announcecards, killcards = GetConVar( "mw2cc_allowannouncecards" ), GetConVar( "mw2cc_allowkillcards" )
+local announcex, announcey = GetConVar( "mw2cc_announcex" ), GetConVar( "mw2cc_announcey" )
+local killx, killy = GetConVar( "mw2cc_killx" ), GetConVar( "mw2cc_killy" )
+local flipemblem, cardscale = GetConVar( "mw2cc_flipemblem" ), GetConVar( "mw2cc_scale" )
 
 -- Dispatches a call card
 
@@ -17,36 +21,38 @@ local green_glow = Color( 0, 197, 0, 166)
 -- killcard         | Bool or nil |     Whether this card should render as a kill card or not
 -- snd              | String or "" for no sound |   The sound effect to play instead of the default
 function MW2CC:DispatchCallCard( ent, comment, banner_path, emblem_path, killcard, snd )
+    local scale = ScreenScaleH(0.45 * cardscale:GetFloat())
+    local scrw, scrh = ScrW() - 370 * scale, ScrH() - 130 * scale
     local tbl = { 
-        ent = ent, 
-        comment = comment, 
+        ent = ent,
+        comment = comment,
         killcard = killcard,
-        target_x = ScrW() * GetConVar( "mw2cc_announcex" ):GetFloat(),
-        target_y = ScrH() * GetConVar( "mw2cc_killy" ):GetFloat(),
+        target_x = scrw * announcex:GetFloat(),
+        target_y = scrh * killy:GetFloat(),
         bottom_alpha = 255,
         snd = snd,
-        flip = GetConVar( "mw2cc_flipemblem" ):GetBool() ,
+        flip = flipemblem:GetBool() ,
         
         played_snd = false,
     }
     
     -- Set up the card positions based on if its a kill card or a call card
     if killcard then
-        local invert = GetConVar( "mw2cc_killy" ):GetFloat() < 0.5
-        tbl.x = ScrW() * GetConVar( "mw2cc_killx" ):GetFloat()
-        tbl.y = !invert and ScrH() * 2 or ScrH() * -2
+        local invert = killy:GetFloat() < 0.5
+        tbl.x = scrw * killx:GetFloat()
+        tbl.y = !invert and scrh * 2 or scrh * -2
 
         tbl.invert = invert
         tbl.comment_x = 170
         tbl.comment_y = !invert and -150 or 50
         tbl.end_time = 3
     else
-        local invert = GetConVar( "mw2cc_announcex" ):GetFloat() < 0.5
+        local invert = announcex:GetFloat() < 0.5
 
         tbl.invert = invert
-        tbl.x = !invert and ScrW() * 2 or ScrW() * -2
-        tbl.y = ScrH() * GetConVar( "mw2cc_announcey" ):GetFloat()
-        tbl.comment_x = !invert and ScrW() * 2 or ScrW() * -2
+        tbl.x = !invert and scrw * 2 or scrw * -2
+        tbl.y = scrh * announcey:GetFloat()
+        tbl.comment_x = !invert and scrw * 2 or scrw * -2
         tbl.comment_y = 0
         tbl.end_time = 5
     end
@@ -104,7 +110,7 @@ function MW2CC:GetMaterial( path )
         })
         self.VTFindex = self.VTFindex + 1
     else
-        mat = Material( path, "smooth" )
+        mat = Material( path, "mips smooth" )
     end
 
     return mat
@@ -126,7 +132,7 @@ local function GetPlayerAvatarMaterial(ply, callback)
         -- Get the image data
         http.Fetch( avatarUrl, function( body )
             file.Write( "mw2cc_data/" .. steamID64 .. ".jpg", body ) -- Write to a file so we can retrieve it in the Material() function
-            local mat = Material( "../data/mw2cc_data/" .. steamID64 .. ".jpg" )
+            local mat = Material( "../data/mw2cc_data/" .. steamID64 .. ".jpg", "mips smooth" )
             callback( mat )
 
             -- Don't need it anymore
@@ -141,9 +147,11 @@ end
 function MW2CC:DrawCallCard( card )
 
     card.lastdraw = CurTime() -- Used to remove VGUI elements if this card isn't drawn anymore
-    
-    local w = 370
-    local h = 100
+
+    local scale = ScreenScaleH(0.45 * cardscale:GetFloat())
+    local w = 370 * scale
+    local h = 100 * scale
+    local pfpx, pfpy, pfpl, pfps, pfpoffset = 90 * scale, 30 * scale, 80 * scale, 25 * scale, ScreenScaleH(1 * cardscale:GetFloat())
     local x = card.x
     local y = card.y
 
@@ -154,7 +162,7 @@ function MW2CC:DrawCallCard( card )
     surface.SetDrawColor( 0, 0, 0)
     surface.DrawOutlinedRect( x, y, w, h, 2 )
 
-    local scanlines = 20
+    local scanlines = 20 * scale
     for i = 1, scanlines do 
         surface.SetDrawColor( 0, 0, 0, 150 )
         surface.DrawRect( x, y + ( h * ( i / scanlines ) ), w, 1 )
@@ -162,20 +170,21 @@ function MW2CC:DrawCallCard( card )
 
     -- Lower body
     surface.SetDrawColor( 139, 139, 139, 40 * ( card.bottom_alpha / 255 ) )
-    surface.DrawRect( x, y + h, w, 30 )
+    surface.DrawRect( x, y + h, w, pfpy )
     surface.SetDrawColor( 0, 0, 0, 255* ( card.bottom_alpha / 255 ))
-    surface.DrawOutlinedRect( x, y + h, w, 30, 1 )
+    surface.DrawOutlinedRect( x, y + h - 1, w, pfpy+1, 2 )
 
+    scanlines = scanlines * 0.3
     for i = 1, scanlines do 
         surface.SetDrawColor( 0, 0, 0, 150 * ( card.bottom_alpha / 255 ) )
-        surface.DrawRect( x, ( y + h ) + ( 30 * ( i / scanlines ) ), w, 1 )
+        surface.DrawRect( x, ( y + h ) + ( pfpy * ( i / scanlines ) ), w, 1 )
     end
 
     -- Picture
     if card.ent:IsPlayer() and !IsValid( card.mw2cc_pfp ) and !card.hashdpfp then
         card.mw2cc_pfp = vgui.Create( "AvatarImage", GetHUDPanel() )
-        card.mw2cc_pfp:SetPos( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h - 90 )
-        card.mw2cc_pfp:SetSize( !card.flip and 80 or 25, !card.flip and 80 or 25 )
+        card.mw2cc_pfp:SetPos( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h - pfpx )
+        card.mw2cc_pfp:SetSize( !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
         card.mw2cc_pfp:SetPlayer( card.ent )
         
         function card.mw2cc_pfp:Think()
@@ -195,38 +204,38 @@ function MW2CC:DrawCallCard( card )
     elseif card.ent:IsPlayer() and card.hashdpfp then -- Use the higher quality profile picture
         surface.SetDrawColor( 255, 255, 255, !card.flip and 255 or 255 * ( card.bottom_alpha / 255 ) )
         surface.SetMaterial( card.hdpfp )
-        surface.DrawTexturedRect( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h + 3, !card.flip and 80 or 25, !card.flip and 80 or 25 )
+        surface.DrawTexturedRect( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset, !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
     else
         surface.SetDrawColor( 255, 255, 255 )
         surface.SetMaterial( card.pfp )
-        surface.DrawTexturedRect( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h + 3, !card.flip and 80 or 25, !card.flip and 80 or 25 )
+        surface.DrawTexturedRect( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset, !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
     end
 
     if IsValid( card.mw2cc_pfp ) then
-        card.mw2cc_pfp:SetPos( !card.flip and x + w - 90 or x + w - 30, !card.flip and y + h - 90 or y + h + 3 )
+        card.mw2cc_pfp:SetPos( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset )
     end
     ----------
 
     -- Emblem
     surface.SetDrawColor( 255, 255, 255, !card.flip and 255 * ( card.bottom_alpha / 255 ) or 255 )
     surface.SetMaterial( card.emblem_mat )
-    surface.DrawTexturedRect( !card.flip and x + w - 30 or x + w - 90, !card.flip and y + h + 3 or y + h - 90, !card.flip and 25 or 80, !card.flip and 25 or 80 )
+    surface.DrawTexturedRect( !card.flip and x + w - pfpy or x + w - pfpx, !card.flip and y + h + pfpoffset or y + h - pfpx, !card.flip and pfps or pfpl, !card.flip and pfps or pfpl )
 
     -- Banner
     surface.SetDrawColor( 255, 255, 255)
     surface.SetMaterial( card.banner_mat )
-    surface.DrawTexturedRect( x + 15, y + 10, 250, 45 )
+    surface.DrawTexturedRect( x + 15 * scale, y + 10 * scale, 250 * scale, 45 * scale )
 
     -- Comment
     
-    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( x + 10 ) + card.comment_x, ( y + h ) + card.comment_y, green_glow, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
-    draw.DrawText( card.comment, "mw2callcard_commentfont", ( x + 10 ) + card.comment_x, ( y + h ) + card.comment_y, color_white, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
+    draw.DrawText( card.comment, "mw2callcard_commentblurfont", ( x + 10 * scale ) + card.comment_x * scale, ( y + h ) + card.comment_y * scale, green_glow, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
+    draw.DrawText( card.comment, "mw2callcard_commentfont", ( x + 10 * scale ) + card.comment_x * scale, ( y + h ) + card.comment_y * scale, color_white, !card.killcard and TEXT_ALIGN_LEFT or TEXT_ALIGN_CENTER )
 
     -- Main name
     if !IsValid( card.mw2cc_name ) then
         card.mw2cc_name = vgui.Create( "DLabel", GetHUDPanel() )
-        card.mw2cc_name:SetPos( x + 10, y + h - 40  )
-        card.mw2cc_name:SetSize( 265, 30 )
+        card.mw2cc_name:SetPos( x + 10 * scale, y + h - 40 * scale  )
+        card.mw2cc_name:SetSize( 265 * scale, 30 * scale )
         card.mw2cc_name:SetText( card.name )
         card.mw2cc_name:SetFont( "mw2callcard_namefont" )
         card.mw2cc_name:SetColor( green )
@@ -238,12 +247,13 @@ function MW2CC:DrawCallCard( card )
             end
         end
     else
-        card.mw2cc_name:SetPos( x + 10, y + h - 40 )
+        card.mw2cc_name:SetPos( x + 10 * scale, y + h - 40 * scale )
     end
 end
 
 
 hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
+    local scrw, scrh, scale = ScrW(), ScrH(), ScreenScaleH(0.45 * cardscale:GetFloat())
 
     -- Call card queue --
     -- The announcement cards
@@ -266,13 +276,13 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
         if timeleft > card.end_time * 0.5 then -- Animate in
             card.x = Lerp( FrameTime() * 30, card.x, card.target_x )
         elseif timeleft < card.end_time * 0.2 then -- Animate out
-            card.x = Lerp( FrameTime() * 5, card.x, !card.invert and ScrW() * 2 or ScrW() * -2 )
+            card.x = Lerp( FrameTime() * 5, card.x, !card.invert and scrw * 2 or scrw * -2 )
         end
 
         -- Animate the comment in after a delay
         if timeleft < card.end_time * 0.70 then
             card.comment_x = Lerp( FrameTime() * 30, card.comment_x, 0 )
-            card.bottom_alpha = ( card.comment_x / ( ScrW() * 2 ) ) * 255
+            card.bottom_alpha = ( card.comment_x / ( scrw * 2 ) ) * 255
         end
 
         MW2CC:DrawCallCard( card )
@@ -294,7 +304,7 @@ hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
         if timeleft > card.end_time * 0.5 then -- Animate in
             card.y = Lerp( FrameTime() * 30, card.y, card.target_y )
         elseif timeleft < card.end_time * 0.2 then -- Animate out
-            card.y = Lerp( FrameTime() * 5, card.y, !card.invert and ScrH() * 2 or ScrH() * -2 )
+            card.y = Lerp( FrameTime() * 5, card.y, !card.invert and scrh * 2 or scrh * -2 )
         end
 
         MW2CC:DrawCallCard( card )
@@ -312,8 +322,8 @@ net.Receive( "mw2cc_net_dispatchcard", function( len, ply )
     local snd = net.ReadString()
     local killcard = net.ReadBool()
 
-    if !killcard and !GetConVar( "mw2cc_allowannouncecards" ):GetBool() then return end
-    if killcard and !GetConVar( "mw2cc_allowkillcards" ):GetBool() then return end
+    if !killcard and !announcecards:GetBool() then return end
+    if killcard and !killcards:GetBool() then return end
 
     local path = snd == "" and "mw2cc/mp_cardslide_v6.wav" or snd == "none" and "" or snd
 
