@@ -52,8 +52,8 @@ end
 
 if CLIENT then
 
-    local clientcolor = Color( 255, 145, 0 )
-    local servercolor = Color( 0, 174, 255 )
+    local clientcolor = Color( 192, 109, 0)
+    local servercolor = Color( 0, 131, 192)
 
     hook.Add( "AddToolMenuCategories", "mw2cc_spawnmenu_options", function()
         spawnmenu.AddToolCategory( "Utilities", "MW2CC Options", "#MW2CC Options" )
@@ -62,30 +62,34 @@ if CLIENT then
     hook.Add( "PopulateToolMenu", "mw2cc_spawnmenu_options", function()
         spawnmenu.AddToolMenuOption( "Utilities", "MW2CC Options", "mw2cc_options", "Options", "", "", function( pnl )
 
-            pnl:Help( "Modern Warfare 2 2009 Call Cards Remastered" )
+            pnl:SetName( "Modern Warfare 2 2009 Call Cards Remastered" )
 
+            local clvar, svvar = vgui.Create("DForm"), vgui.Create("DForm")
+            clvar:SetName("Client")
+            svvar:SetName("Server")
+            pnl:AddItem(clvar)
+            pnl:AddItem(svvar)
             -- I only needed sliders and bools
             for k, v in ipairs( MW2CC.ConVars ) do
+                local cat = v.clientside and clvar or svvar
                 local clr = v.clientside and clientcolor or servercolor
-                local prefix = v.clientside and "Client-Side | " or "Server-Side | "
+                -- local prefix = v.clientside and "Client-Side | " or "Server-Side | "
                 if v.type == "bool" then
-                    pnl:CheckBox( v.optionname, v.name )
-                    local lbl = pnl:ControlHelp( prefix .. v.desc .. "\n\nDefault: " .. v.cvar:GetDefault() )
-                    lbl:SetColor( clr )
+                    cat:CheckBox( v.optionname, v.name )
                 elseif v.type == "slider" then
-                    pnl:NumSlider( v.optionname, v.name, v.min, v.max, v.decimals )
-                    local lbl = pnl:ControlHelp( prefix .. v.desc .. "\n\nDefault: " .. v.cvar:GetDefault() )
-                    lbl:SetColor( clr )
+                    cat:NumSlider( v.optionname, v.name, v.min, v.max, v.decimals )
                 end
+                local lbl = cat:Help( v.desc .. "\n\nDefault: " .. v.cvar:GetDefault() )
+                lbl:SetColor( clr )
             end
 
-            pnl:Button( "Preview Announcement Card", "mw2cc_previewannouncement" )
-            pnl:Button( "Preview Kill Card", "mw2cc_previewkill" )
-            pnl:Button( "Change Banner", "mw2cc_openbannerpanel" )
-            pnl:Button( "Change Emblem", "mw2cc_openemblempanel" )
-            pnl:Button( "Clear Card Queue", "mw2cc_clearqueue" )
-            pnl:Button( "Reload Assets", "mw2cc_reloadassets" )
-            pnl:ControlHelp( "For performance reasons, you must reload assets in order for new custom banners/emblems to be randomly applied onto entities" )
+            svvar:Button( "Preview Announcement Card", "mw2cc_previewannouncement" )
+            svvar:Button( "Preview Kill Card", "mw2cc_previewkill" )
+            clvar:Button( "Change Banner", "mw2cc_openbannerpanel" )
+            clvar:Button( "Change Emblem", "mw2cc_openemblempanel" )
+            clvar:Button( "Clear Card Queue", "mw2cc_clearqueue" )
+            svvar:Button( "Reload Assets", "mw2cc_reloadassets" )
+            svvar:Help( "For performance reasons, you must reload assets in order for new custom banners/emblems to be randomly applied onto entities.\n" )
             
             
         end )
