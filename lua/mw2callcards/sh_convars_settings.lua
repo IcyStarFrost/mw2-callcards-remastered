@@ -19,7 +19,7 @@ MW2CC:ConVar( "Allow Kill Cards", "mw2cc_allowkillcards", 1, true, "bool", "If k
 MW2CC:ConVar( "Allow NPCs", "mw2cc_allownpcs", 1, false, "bool", "If multikills/killstreaks are allowed to show for base game NPCs. I.e Combine soldiers", 0, 1 )
 MW2CC:ConVar( "Allow Nextbots", "mw2cc_allownextbots", 1, false, "bool", "If multikills/killstreaks are allowed to show for nextbots", 0, 1 )
 MW2CC:ConVar( "Allow Other Ents", "mw2cc_allowotherents", 1, false, "bool", "If multikills/killstreaks are allowed to show for entities such as props", 0, 1 )
-MW2CC:ConVar( "Flip Emblem and PFP", "mw2cc_flipemblem", 0, true, "bool", "If emblem and PFP should switch positions. Resembles MW2 more", 0, 1 )
+MW2CC:ConVar( "Swap Emblem and Avatar", "mw2cc_flipemblem", 0, true, "bool", "If emblem and avatar should switch positions. Resembles MW2 more", 0, 1 )
 
 MW2CC:ConVar( "Killstreak Threshold", "mw2cc_killstreakthreshold", 5, false, "slider", "The amount of kills needed without dying before a killstreak announcement is made", 1, 50, 0 )
 
@@ -73,13 +73,15 @@ if CLIENT then
             for k, v in ipairs( MW2CC.ConVars ) do
                 local cat = v.clientside and clvar or svvar
                 local clr = v.clientside and clientcolor or servercolor
+                local def = v.cvar:GetDefault()
                 -- local prefix = v.clientside and "Client-Side | " or "Server-Side | "
                 if v.type == "bool" then
                     cat:CheckBox( v.optionname, v.name )
+                    def = v.cvar:GetDefault() == "1" and "True" or "False"
                 elseif v.type == "slider" then
                     cat:NumSlider( v.optionname, v.name, v.min, v.max, v.decimals )
                 end
-                local lbl = cat:Help( v.desc .. "\n\nDefault: " .. v.cvar:GetDefault() )
+                local lbl = cat:Help( v.desc .. "\n\nDefault: " .. def )
                 lbl:SetColor( clr )
             end
 
@@ -89,7 +91,7 @@ if CLIENT then
             clvar:Button( "Change Emblem", "mw2cc_openemblempanel" )
             clvar:Button( "Clear Card Queue", "mw2cc_clearqueue" )
             svvar:Button( "Reload Assets", "mw2cc_reloadassets" )
-            svvar:Help( "For performance reasons, you must reload assets in order for new custom banners/emblems to be randomly applied onto entities.\n" )
+            svvar:Help( "For performance reasons, you must reload assets in order for new custom banners/emblems to be randomly applied onto entities.\n" ) -- \n is for nice spacing at the bottom
             
             
         end )
