@@ -3,10 +3,11 @@ MW2CC.ConVars = {}
 -- Convenience system for handling convars and spawnmenu settings
 function MW2CC:ConVar( optionname, name, value, clientside, type, helptext, min, max, decimals )
     local cvar
-    if clientside and CLIENT then
+    if clientside then
+        if SERVER then return end
         cvar = CreateConVar( name, value, FCVAR_ARCHIVE, helptext, min, max )
     else
-        cvar = CreateConVar( name, value, FCVAR_ARCHIVE, helptext, min, max )
+        cvar = CreateConVar( name, value, FCVAR_ARCHIVE+FCVAR_REPLICATED, helptext, min, max )
     end
 
     MW2CC.ConVars[ #MW2CC.ConVars + 1 ] = { optionname = optionname, decimals = decimals, type = type, name = name, value = value, desc = helptext, cvar = cvar, clientside = clientside, min = min, max = max }
@@ -22,10 +23,11 @@ MW2CC:ConVar( "Flip Emblem and PFP", "mw2cc_flipemblem", 0, true, "bool", "If em
 
 MW2CC:ConVar( "Killstreak Threshold", "mw2cc_killstreakthreshold", 5, false, "slider", "The amount of kills needed without dying before a killstreak announcement is made", 1, 50, 0 )
 
-MW2CC:ConVar( "Announce Card Y", "mw2cc_announcey", 0.036, true, "slider", "The verticle position of the announce cards as a percentage of your screen size", 0, 1, 3 )
-MW2CC:ConVar( "Announce Card X", "mw2cc_announcex", 0.765, true, "slider", "The horizontal position of the announce cards as a percentage of your screen size", 0, 1, 3 )
-MW2CC:ConVar( "Kill Card Y", "mw2cc_killy", 0.86, true, "slider", "The verticle position of the killcards as a percentage of your screen size", 0, 1, 3 )
-MW2CC:ConVar( "Kill Card X", "mw2cc_killx", 0.403, true, "slider", "The horizontal position of the killcards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Card Scale", "mw2cc_scale", 1, true, "slider", "The scale to multiply the size of the announce cards by", 0.5, 3, 3 )
+MW2CC:ConVar( "Announce Card Y", "mw2cc_announcey", 0.125, true, "slider", "The vertical position of the announce cards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Announce Card X", "mw2cc_announcex", 0.975, true, "slider", "The horizontal position of the announce cards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Kill Card Y", "mw2cc_killy", 0.925, true, "slider", "The vertical position of the killcards as a percentage of your screen size", 0, 1, 3 )
+MW2CC:ConVar( "Kill Card X", "mw2cc_killx", 0.5, true, "slider", "The horizontal position of the killcards as a percentage of your screen size", 0, 1, 3 )
 
 concommand.Add( "mw2cc_previewannouncement", function( ply )
     MW2CC:DispatchCallCard( ply, "PREVIEW TEST", false, ply )
