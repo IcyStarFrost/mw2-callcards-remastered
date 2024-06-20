@@ -23,6 +23,7 @@ MW2CC:ConVar( "Swap Emblem and Avatar", "mw2cc_flipemblem", 0, true, "bool", "If
 MW2CC:ConVar( "Enable Smoothing", "mw2cc_smoothing", 0, true, "bool", "If images such as banners and emblems should be smoothed", 0, 1 )
 
 MW2CC:ConVar( "Killstreak Threshold", "mw2cc_killstreakthreshold", 5, false, "slider", "The amount of kills needed without dying before a killstreak announcement is made", 1, 50, 0 )
+MW2CC:ConVar( "Multikill Timeout", "mw2cc_multikilltimeout", 0.5, false, "slider", "The maximum amount of time between kills to be counted towards a multikill", 0.25, 10, 2 )
 
 MW2CC:ConVar( "Card Scale", "mw2cc_scale", 1, true, "slider", "The scale to multiply the size of the announce cards by", 0.5, 3, 3 )
 MW2CC:ConVar( "Announce Card Y", "mw2cc_announcey", 0.125, true, "slider", "The vertical position of the announce cards as a percentage of your screen size", 0, 1, 3 )

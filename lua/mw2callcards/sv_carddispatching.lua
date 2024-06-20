@@ -8,6 +8,8 @@
 
 -- sndpath can be nil for the default sound or a sound path for a custom sound. input "none" if no sound should play
 -- Previous callcard addon wasn't really dev friendly. This one is. 
+local ksthreshold, npccard, nbcard, entcard, rapidtimeout = GetConVar( "mw2cc_killstreakthreshold" ), GetConVar( "mw2cc_allownpcs" ), GetConVar( "mw2cc_allownextbots" ), GetConVar( "mw2cc_allowotherents" ), GetConVar( "mw2cc_multikilltimeout" )
+
 function MW2CC:DispatchCallCard( ent, comment, killcard, ply, sndpath )
     net.Start( "mw2cc_net_dispatchcard" )
     net.WriteEntity( ent )
@@ -37,18 +39,19 @@ function MW2CC:EntKilled( victim, attacker )
     end
     ----------------
 
+    local timeout = rapidtimeout:GetFloat()
     -- Variable system that tracks multi kills --
     attacker.mw2cc_rapidkills = attacker.mw2cc_rapidkills and 
     CurTime() < attacker.mw2cc_rapidkills.timeout and 
-    attacker.mw2cc_rapidkills or { timeout = CurTime() + 0.5, kills = 0, ignoreents = {} }
+    attacker.mw2cc_rapidkills or { timeout = CurTime() + timeout, kills = 0, ignoreents = {} }
 
     if !attacker.mw2cc_rapidkills.ignoreents[ victim ] then
-        attacker.mw2cc_rapidkills.timeout = CurTime() + 0.5
+        attacker.mw2cc_rapidkills.timeout = CurTime() + timeout
         attacker.mw2cc_rapidkills.kills = attacker.mw2cc_rapidkills.kills + 1
         attacker.mw2cc_rapidkills.ignoreents[ victim ] = true
     end
 
-    timer.Create( "mw2cc_rapidkills_" .. attacker:GetCreationID(), 0.5, 1, function()
+    timer.Create( "mw2cc_rapidkills_" .. attacker:GetCreationID(), timeout, 1, function()
         if !IsValid( attacker ) then return end 
 
         if attacker.mw2cc_rapidkills.kills == 2 then
@@ -67,7 +70,7 @@ function MW2CC:EntKilled( victim, attacker )
 
     -- If you look at the old code for dispatching killstreak announcements, you can tell this is light years better.
     -- Killstreak modulus allows for custom killstreak thresholds and takes up less lines
-    if attacker.mw2cc_killstreak % GetConVar( "mw2cc_killstreakthreshold" ):GetInt() == 0 then
+    if attacker.mw2cc_killstreak % ksthreshold:GetInt() == 0 then
         self:DispatchCallCard( attacker, string.CardinalToOrdinal( attacker.mw2cc_killstreak ):upper() .. " KILLSTREAK!" )
         hook.Run( "MW2CC_OnKillstreak", attacker, attacker.mw2cc_killstreak )
     end
@@ -76,8 +79,8 @@ end
 
 -- Top of the chain --
 hook.Add( "PlayerDeath", "mw2cc_playerdeath", function( victim, inf, attacker ) 
-    if attacker:IsNPC() and !GetConVar( "mw2cc_allownpcs" ):GetBool() or attacker:IsNextBot() and !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
-    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !GetConVar( "mw2cc_allowotherents" ):GetBool() then return end
+    if attacker:IsNPC() and !npccard:GetBool() or attacker:IsNextBot() and !nbcard:GetBool() then return end
+    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !entcard:GetBool() then return end
 
     MW2CC:EntKilled( victim, attacker )
 end )
@@ -86,8 +89,8 @@ end )
 hook.Add( "PostEntityTakeDamage", "mw2cc_postentitytakedamage", function( ent, dmg )
     local attacker = dmg:GetAttacker()
     if !ent:IsNPC() and !ent:IsNextBot() or ent:IsPlayer() or ent:Health() > 0 or ent.mw2cc_ignore then return end
-    if attacker:IsNPC() and !GetConVar( "mw2cc_allownpcs" ):GetBool() or attacker:IsNextBot() and !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
-    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !GetConVar( "mw2cc_allowotherents" ):GetBool() then return end
+    if attacker:IsNPC() and !npccard:GetBool() or attacker:IsNextBot() and !nbcard:GetBool() then return end
+    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !entcard:GetBool() then return end
 
     ent.mw2cc_ignore = true
     MW2CC:EntKilled( ent, attacker )
@@ -95,9 +98,9 @@ end )
 
 hook.Add( "LambdaOnKilled", "mw2cc_lambdaonkilled", function( lambda, dmg )
     local attacker = dmg:GetAttacker()
-    if !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
-    if attacker:IsNPC() and !GetConVar( "mw2cc_allownpcs" ):GetBool() or attacker:IsNextBot() and !GetConVar( "mw2cc_allownextbots" ):GetBool() then return end
-    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !GetConVar( "mw2cc_allowotherents" ):GetBool() then return end
+    if !nbcard:GetBool() then return end
+    if attacker:IsNPC() and !npccard:GetBool() or attacker:IsNextBot() and !nbcard:GetBool() then return end
+    if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !entcard:GetBool() then return end
 
     MW2CC:EntKilled( lambda, attacker )
 end )
