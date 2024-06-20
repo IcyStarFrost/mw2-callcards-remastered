@@ -8,7 +8,6 @@
 
 -- sndpath can be nil for the default sound or a sound path for a custom sound. input "none" if no sound should play
 -- Previous callcard addon wasn't really dev friendly. This one is. 
-local ksthreshold, npccard, nbcard, entcard, rapidtimeout = GetConVar( "mw2cc_killstreakthreshold" ), GetConVar( "mw2cc_allownpcs" ), GetConVar( "mw2cc_allownextbots" ), GetConVar( "mw2cc_allowotherents" ), GetConVar( "mw2cc_multikilltimeout" )
 
 function MW2CC:DispatchCallCard( ent, comment, killcard, ply, sndpath )
     net.Start( "mw2cc_net_dispatchcard" )
@@ -23,6 +22,7 @@ end
 
 
 function MW2CC:EntKilled( victim, attacker )
+    local ksthreshold, rapidtimeout = GetConVar( "mw2cc_killstreakthreshold" ), GetConVar( "mw2cc_multikilltimeout" )
     victim.mw2cc_killstreak = 0
 
     if victim == attacker then return end -- You don't get killstreaks by killing yourself
@@ -79,6 +79,7 @@ end
 
 -- Top of the chain --
 hook.Add( "PlayerDeath", "mw2cc_playerdeath", function( victim, inf, attacker ) 
+    local npccard, nbcard, entcard = GetConVar( "mw2cc_allownpcs" ), GetConVar( "mw2cc_allownextbots" ), GetConVar( "mw2cc_allowotherents" )
     if attacker:IsNPC() and !npccard:GetBool() or attacker:IsNextBot() and !nbcard:GetBool() then return end
     if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !entcard:GetBool() then return end
 
@@ -88,6 +89,7 @@ end )
 
 hook.Add( "PostEntityTakeDamage", "mw2cc_postentitytakedamage", function( ent, dmg )
     local attacker = dmg:GetAttacker()
+    local npccard, nbcard, entcard = GetConVar( "mw2cc_allownpcs" ), GetConVar( "mw2cc_allownextbots" ), GetConVar( "mw2cc_allowotherents" )
     if !ent:IsNPC() and !ent:IsNextBot() or ent:IsPlayer() or ent:Health() > 0 or ent.mw2cc_ignore then return end
     if attacker:IsNPC() and !npccard:GetBool() or attacker:IsNextBot() and !nbcard:GetBool() then return end
     if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !entcard:GetBool() then return end
@@ -98,6 +100,7 @@ end )
 
 hook.Add( "LambdaOnKilled", "mw2cc_lambdaonkilled", function( lambda, dmg )
     local attacker = dmg:GetAttacker()
+    local npccard, nbcard, entcard = GetConVar( "mw2cc_allownpcs" ), GetConVar( "mw2cc_allownextbots" ), GetConVar( "mw2cc_allowotherents" )
     if !nbcard:GetBool() then return end
     if attacker:IsNPC() and !npccard:GetBool() or attacker:IsNextBot() and !nbcard:GetBool() then return end
     if !attacker:IsNPC() and !attacker:IsNextBot() and !attacker:IsPlayer() and !entcard:GetBool() then return end
