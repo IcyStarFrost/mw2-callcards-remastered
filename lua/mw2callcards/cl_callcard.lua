@@ -11,6 +11,7 @@ local announcecards, killcards = GetConVar( "mw2cc_allowannouncecards" ), GetCon
 local announcex, announcey = GetConVar( "mw2cc_announcex" ), GetConVar( "mw2cc_announcey" )
 local killx, killy = GetConVar( "mw2cc_killx" ), GetConVar( "mw2cc_killy" )
 local flipemblem, cardscale = GetConVar( "mw2cc_flipemblem" ), GetConVar( "mw2cc_scale" )
+local smoothing = GetConVar( "mw2cc_smoothing" )
 
 -- Dispatches a call card
 
@@ -110,7 +111,7 @@ function MW2CC:GetMaterial( path )
         })
         self.VTFindex = self.VTFindex + 1
     else
-        mat = Material( path, "mips smooth" )
+        mat = Material( path, smoothing:GetBool() and "mips smooth" or "" )
     end
 
     return mat
@@ -132,7 +133,7 @@ local function GetPlayerAvatarMaterial(ply, callback)
         -- Get the image data
         http.Fetch( avatarUrl, function( body )
             file.Write( "mw2cc_data/" .. steamID64 .. ".jpg", body ) -- Write to a file so we can retrieve it in the Material() function
-            local mat = Material( "../data/mw2cc_data/" .. steamID64 .. ".jpg", "mips smooth" )
+            local mat = Material( "../data/mw2cc_data/" .. steamID64 .. ".jpg", smoothing:GetBool() and "mips smooth" or "" )
             callback( mat )
 
             -- Don't need it anymore
