@@ -253,7 +253,7 @@ end
 
 
 hook.Add( "HUDPaint", "mw2-callcards-HudPaint", function()
-    local scrw, scrh, scale = ScrW(), ScrH(), ScreenScaleH(0.45 * cardscale:GetFloat())
+    local scrw, scrh = ScrW(), ScrH()
 
     -- Call card queue --
     -- The announcement cards
