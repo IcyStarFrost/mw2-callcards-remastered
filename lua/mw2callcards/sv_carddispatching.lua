@@ -42,14 +42,14 @@ function MW2CC:EntKilled( victim, attacker )
     CurTime() < attacker.mw2cc_rapidkills.timeout and 
     attacker.mw2cc_rapidkills or { timeout = CurTime() + 0.5, kills = 0, ignoreents = {} }
 
-    if !attacker.mw2cc_rapidkills.ignoreents[ victim ] then
+    if attacker.mw2cc_rapidkills and !attacker.mw2cc_rapidkills.ignoreents[ victim ] then
         attacker.mw2cc_rapidkills.timeout = CurTime() + 0.5
         attacker.mw2cc_rapidkills.kills = attacker.mw2cc_rapidkills.kills + 1
         attacker.mw2cc_rapidkills.ignoreents[ victim ] = true
     end
 
     timer.Create( "mw2cc_rapidkills_" .. attacker:GetCreationID(), 0.5, 1, function()
-        if !IsValid( attacker ) then return end 
+        if !IsValid( attacker ) or !attacker.mw2cc_rapidkills then return end 
 
         if attacker.mw2cc_rapidkills.kills == 2 then
             MW2CC:DispatchCallCard( attacker, "Double Kill!" )
