@@ -207,7 +207,7 @@ function MW2CC:DrawCallCard( card )
         surface.SetMaterial( card.hdpfp )
         surface.DrawTexturedRect( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset, !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
     else
-        surface.SetDrawColor( 255, 255, 255 )
+        surface.SetDrawColor( 255, 255, 255, !card.flip and 255 or 255 * ( card.bottom_alpha / 255 ) )
         surface.SetMaterial( card.pfp )
         surface.DrawTexturedRect( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset, !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
     end
