@@ -119,7 +119,7 @@ end
 
 -- Retrieves a player's profile picture through the steam API. This will allow higher quality pfps for players if it succeeds
 local function GetPlayerAvatarMaterial(ply, callback)
-    if !IsValid( ply ) then return end
+    if !IsValid( ply ) or ply:IsBot() then return end
     local steamID64 = ply:SteamID64()
 
     http.Fetch( "https://steamcommunity.com/profiles/" .. steamID64 .. "?xml=1", function( body, len, headers, code )
