@@ -90,7 +90,7 @@ net.Receive( "mw2cc_net_clientsendcosmetics", function( len, ply )
         ply.mw2cc_banner = banner
 
         if !ServerHasFile( banner ) then
-            --RequestCustomImage( ply, banner )
+            RequestCustomImage( ply, banner )
         end
     end
 
@@ -98,7 +98,7 @@ net.Receive( "mw2cc_net_clientsendcosmetics", function( len, ply )
         ply.mw2cc_emblem = emblem
 
         if !ServerHasFile( emblem ) then
-            --RequestCustomImage( ply, banner )
+            --RequestCustomImage( ply, emblem )
         end
     end
 end )
