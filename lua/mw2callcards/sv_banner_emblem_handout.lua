@@ -73,6 +73,8 @@ local function RequestCustomImage( ply, path )
 
         print( "Received Chunk", string.NiceSize( #chunk ) )
 
+        chunk = util.Decompress( chunk )
+
         image = image .. chunk
 
         if isdone then
