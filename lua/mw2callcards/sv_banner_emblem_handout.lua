@@ -48,6 +48,7 @@ hook.Add( "OnEntityCreated", "mw2cc_cosmeticassignment", function( ent )
     end )
 end )
 
+
 local function ServerHasFile( path )
     print( "Server has " .. path .. "?", file.Exists( "materials/" .. path, "GAME" ) )
     return file.Exists( "materials/" .. path, "GAME" )
@@ -55,6 +56,7 @@ end
 
 file.CreateDir( "mw2cc_customimagedata" )
 
+-- Retrieve a player's custom banner/emblem for networking to others
 local function RequestCustomImage( ply, path )
     net.Start( "mw2cc_net_customimage" )
     net.WriteString( path )

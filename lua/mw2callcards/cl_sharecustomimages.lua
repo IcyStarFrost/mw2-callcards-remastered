@@ -27,12 +27,13 @@ net.Receive( "mw2cc_net_customimage", function()
 
     if image then
         local cor = coroutine.wrap( function()
+
+            -- Prepare the data
             local compress = util.Compress( image )
             local chunks = DataSplit( compress )
 
+            -- Send the chunked data to the server
             for i, block in ipairs( chunks ) do
-
-                print( isdone, i )
                 net.Start( "mw2cc_net_customimage" )
                 net.WriteUInt( #block, 32 )
                 net.WriteData( block )
