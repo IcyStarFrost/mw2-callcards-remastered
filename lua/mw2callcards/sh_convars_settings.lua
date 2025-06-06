@@ -30,19 +30,18 @@ MW2CC:ConVar( "Announce Card X", "mw2cc_announcex", 0.975, true, "slider", "The 
 MW2CC:ConVar( "Kill Card Y", "mw2cc_killy", 0.925, true, "slider", "The vertical position of the killcards as a percentage of your screen size", 0, 1, 3 )
 MW2CC:ConVar( "Kill Card X", "mw2cc_killx", 0.5, true, "slider", "The horizontal position of the killcards as a percentage of your screen size", 0, 1, 3 )
 
-concommand.Add( "mw2cc_reloadassets", function( ply )
-    if !ply:IsSuperAdmin() then return end
-    MW2CC.assets = MW2CC:GetAssets()
-    PrintMessage( HUD_PRINTTALK, "MW2CC: Assets reloaded")
-end )
-
 if SERVER then
+
+    concommand.Add( "mw2cc_reloadassets", function( ply )
+        if !ply:IsSuperAdmin() then return end
+        MW2CC.assets = MW2CC:GetAssets()
+        PrintMessage( HUD_PRINTTALK, "MW2CC: Assets reloaded")
+    end )
     
     net.Receive( "mw2cc_net_previewannounce", function( len, ply )
         MW2CC:DispatchCallCard( ply, "PREVIEW TEST", false, ply )
     end )
 
-    
     net.Receive( "mw2cc_net_previewkill", function( len, ply )
         MW2CC:DispatchCallCard( ply, "KILL TEST", true, ply )
     end )
