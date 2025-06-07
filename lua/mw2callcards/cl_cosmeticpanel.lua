@@ -37,33 +37,35 @@ function MW2CC:OpenCosmeticPanel( ply, type )
     default_listview:AddColumn( "Banner Name", 1 )
     default_listview:AddColumn( "Time Added", 2 )
 
-    local custompnl = vgui.Create( "DPanel", main )
-
-    local custom_listview = vgui.Create( "DListView", custompnl )
-    custom_listview:Dock( FILL )
-    custom_listview:AddColumn( "Banner Name", 1 )
-    custom_listview:AddColumn( "Time Added", 2 )
-
-    local customlbl = vgui.Create( "DLabel", custompnl )
-    customlbl:SetText( "Place custom " .. type .. " .pngs, .jpgs, and .vtfs\nin the following directoy:\n\nDRIVE:/Program Files (x86)/steam/steamapps/common/GarrysMod/\nsourceengine/materials/mw2cc/custom/" .. type .. "s/imageshere" )
-    customlbl:SetSize( 1, 70 )
-    customlbl:Dock( TOP )
-
-
-
     tabs:AddSheet( "Default " .. type .. "s", default_listview, "materials/icon16/folder.png" )
-    tabs:AddSheet( "Custom " .. type .. "s", custompnl, "materials/icon16/folder_add.png" )
+    local custom_listview
+
+    if !game.IsDedicated() then
+        local custompnl = vgui.Create( "DPanel", main )
+        
+        custom_listview = vgui.Create( "DListView", custompnl )
+        custom_listview:Dock( FILL )
+        custom_listview:AddColumn( "Banner Name", 1 )
+        custom_listview:AddColumn( "Time Added", 2 )
+
+        local files = file.Find( "materials/mw2cc/custom/" .. type .. "s/*", "GAME", "namedesc" )
+        for k, v in ipairs( files ) do
+            local line = custom_listview:AddLine( v, os.date( "%x %X", file.Time( "materials/mw2cc/custom/" .. type .. "s/" .. v, "GAME" ) ) )
+            line:SetSortValue( 1, "materials/mw2cc/custom/" .. type .. "s/" .. v )
+        end
+
+        local customlbl = vgui.Create( "DLabel", custompnl )
+        customlbl:SetText( "Place custom " .. type .. " .pngs, .jpgs, and .vtfs\nin the following directoy:\n\nDRIVE:/Program Files (x86)/steam/steamapps/common/GarrysMod/\nsourceengine/materials/mw2cc/custom/" .. type .. "s/imageshere" )
+        customlbl:SetSize( 1, 70 )
+        customlbl:Dock( TOP )
+
+        tabs:AddSheet( "Custom " .. type .. "s", custompnl, "materials/icon16/folder_add.png" )
+    end
 
     local files = file.Find( cosmetic_path .. "/*", "GAME", "namedesc" )
     for k, v in ipairs( files ) do
         local line = default_listview:AddLine( v, os.date( "%x %X", file.Time( cosmetic_path .. "/" .. v, "GAME" ) ) )
         line:SetSortValue( 1, cosmetic_path .. "/" .. v )
-    end
-
-    local files = file.Find( "materials/mw2cc/custom/" .. type .. "s/*", "GAME", "namedesc" )
-    for k, v in ipairs( files ) do
-        local line = custom_listview:AddLine( v, os.date( "%x %X", file.Time( "materials/mw2cc/custom/" .. type .. "s/" .. v, "GAME" ) ) )
-        line:SetSortValue( 1, "materials/mw2cc/custom/" .. type .. "s/" .. v )
     end
 
     local rightpnl = vgui.Create( "DPanel", main )
@@ -121,7 +123,10 @@ function MW2CC:OpenCosmeticPanel( ply, type )
     end
 
     default_listview.OnRowSelected = OnRowSelected
-    custom_listview.OnRowSelected = OnRowSelected
+
+    if custom_listview then
+        custom_listview.OnRowSelected = OnRowSelected
+    end
     
 
 end
