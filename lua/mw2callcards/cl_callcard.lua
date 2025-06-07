@@ -119,7 +119,7 @@ end
 
 -- Retrieves a player's profile picture through the steam API. This will allow higher quality pfps for players if it succeeds
 local function GetPlayerAvatarMaterial(ply, callback)
-    if !IsValid( ply ) then return end
+    if !IsValid( ply ) or ply:IsBot() then return end
     local steamID64 = ply:SteamID64()
 
     http.Fetch( "https://steamcommunity.com/profiles/" .. steamID64 .. "?xml=1", function( body, len, headers, code )
@@ -152,11 +152,11 @@ function MW2CC:DrawCallCard( card )
     local scale = ScreenScaleH(0.45 * cardscale:GetFloat())
     local w = 370 * scale
     local h = 100 * scale
-    local pfpx, pfpy, pfpl, pfps, pfpoffset = 90 * scale, 30 * scale, 80 * scale, 25 * scale, ScreenScaleH(1 * cardscale:GetFloat())
     local x = card.x
     local y = card.y
+    local p90, p80, p30, p25, p3s = 90 * scale, 80 * scale, 30 * scale, 25 * scale, ScreenScaleH(1 * cardscale:GetFloat())
+    -- Common offsets sorted by size
 
-    
     -- Main body
     surface.SetDrawColor( 129, 129, 129, 70 )
     surface.DrawRect( x, y, w, h )
@@ -171,21 +171,21 @@ function MW2CC:DrawCallCard( card )
 
     -- Lower body
     surface.SetDrawColor( 139, 139, 139, 40 * ( card.bottom_alpha / 255 ) )
-    surface.DrawRect( x, y + h, w, pfpy )
+    surface.DrawRect( x, y + h, w, p30 )
     surface.SetDrawColor( 0, 0, 0, 255* ( card.bottom_alpha / 255 ))
-    surface.DrawOutlinedRect( x, y + h - 1, w, pfpy+1, 2 )
+    surface.DrawOutlinedRect( x, y + h - 1, w, p30+1, 2 )
 
     scanlines = scanlines * 0.3
     for i = 1, scanlines do 
         surface.SetDrawColor( 0, 0, 0, 150 * ( card.bottom_alpha / 255 ) )
-        surface.DrawRect( x, ( y + h ) + ( pfpy * ( i / scanlines ) ), w, 1 )
+        surface.DrawRect( x, ( y + h ) + ( p30 * ( i / scanlines ) ), w, 1 )
     end
 
     -- Picture
     if card.ent:IsPlayer() and !IsValid( card.mw2cc_pfp ) and !card.hashdpfp then
         card.mw2cc_pfp = vgui.Create( "AvatarImage", GetHUDPanel() )
-        card.mw2cc_pfp:SetPos( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h - pfpx )
-        card.mw2cc_pfp:SetSize( !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
+        card.mw2cc_pfp:SetPos( !card.flip and x + w - p90 or x + w - p30, !card.flip and y + h - p90 or y + h - p90 )
+        card.mw2cc_pfp:SetSize( !card.flip and p80 or p25, !card.flip and p80 or p25 )
         card.mw2cc_pfp:SetPlayer( card.ent )
         
         function card.mw2cc_pfp:Think()
@@ -205,22 +205,22 @@ function MW2CC:DrawCallCard( card )
     elseif card.ent:IsPlayer() and card.hashdpfp then -- Use the higher quality profile picture
         surface.SetDrawColor( 255, 255, 255, !card.flip and 255 or 255 * ( card.bottom_alpha / 255 ) )
         surface.SetMaterial( card.hdpfp )
-        surface.DrawTexturedRect( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset, !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
+        surface.DrawTexturedRect( !card.flip and x + w - p90 or x + w - p30, !card.flip and y + h - p90 or y + h + p3s, !card.flip and p80 or p25, !card.flip and p80 or p25 )
     else
         surface.SetDrawColor( 255, 255, 255, !card.flip and 255 or 255 * ( card.bottom_alpha / 255 ) )
         surface.SetMaterial( card.pfp )
-        surface.DrawTexturedRect( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset, !card.flip and pfpl or pfps, !card.flip and pfpl or pfps )
+        surface.DrawTexturedRect( !card.flip and x + w - p90 or x + w - p30, !card.flip and y + h - p90 or y + h + p3s, !card.flip and p80 or p25, !card.flip and p80 or p25 )
     end
 
     if IsValid( card.mw2cc_pfp ) then
-        card.mw2cc_pfp:SetPos( !card.flip and x + w - pfpx or x + w - pfpy, !card.flip and y + h - pfpx or y + h + pfpoffset )
+        card.mw2cc_pfp:SetPos( !card.flip and x + w - p90 or x + w - p30, !card.flip and y + h - p90 or y + h + p3s )
     end
     ----------
 
     -- Emblem
     surface.SetDrawColor( 255, 255, 255, !card.flip and 255 * ( card.bottom_alpha / 255 ) or 255 )
     surface.SetMaterial( card.emblem_mat )
-    surface.DrawTexturedRect( !card.flip and x + w - pfpy or x + w - pfpx, !card.flip and y + h + pfpoffset or y + h - pfpx, !card.flip and pfps or pfpl, !card.flip and pfps or pfpl )
+    surface.DrawTexturedRect( !card.flip and x + w - p30 or x + w - p90, !card.flip and y + h + p3s or y + h - p90, !card.flip and p25 or p80, !card.flip and p25 or p80 )
 
     -- Banner
     surface.SetDrawColor( 255, 255, 255)
